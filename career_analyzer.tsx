@@ -254,7 +254,7 @@ const SkillSageAnalyzer: React.FC = () => {
     const recommendations: any[] = [];
 
     gaps.forEach((gap) => {
-      const courses = (courseDatabase as any[]).filter(
+      const courses = (courseDatabase as unknown as any[]).filter(
         (course) =>
           course.skill.toLowerCase() === gap.toLowerCase() ||
           gap.toLowerCase().includes(course.skill.toLowerCase())
