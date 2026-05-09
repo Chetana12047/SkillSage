@@ -1,110 +1,73 @@
 import { NextRequest, NextResponse } from 'next/server'
-import ZAI from 'z-ai-web-dev-sdk'
 
-export async function POST(request: NextRequest) {
+export async function POST(
+  request: NextRequest
+) {
+
   try {
-    const { message, context } = await request.json()
 
-    if (!message) {
-      return NextResponse.json({ error: 'Message is required' }, { status: 400 })
-    }
+    const body =
+      await request.json()
 
-    const zai = await ZAI.create()
-    
-    // Build context-aware prompt
-    const contextInfo = context ? `
-      User Context:
-      - Current Goal: ${context.goal || 'Not set'}
-      - Current Skills: ${context.currentSkills?.join(', ') || 'Not assessed'}
-      - Progress: ${context.progress || 'Just starting'}
-      - Current Week: ${context.currentWeek || '1'}
-    ` : ''
+    const message =
+      body.message.toLowerCase()
 
-    const systemPrompt = `You are an AI career companion and mentor for college students learning tech skills. You are:
-    - Encouraging and motivational
-    - Knowledgeable about tech careers and learning paths
-    - Practical and actionable in your advice
-    - Able to break down complex topics into simple steps
-    - Supportive when students face challenges
-    
-    ${contextInfo}
-    
-    Guidelines:
-    - Keep responses conversational and friendly
-    - Provide specific, actionable advice
-    - Include relevant emojis for engagement
-    - Ask follow-up questions to encourage dialogue
-    - Be encouraging but realistic
-    - Focus on progress over perfection
-    
-    Categories for responses:
-    - "guidance": General advice and direction
-    - "motivation": Encouragement and mindset support
-    - "resource": Learning materials and tools
-    - "advice": Career and skill development tips
-    
-    Return your response as a JSON object:
-    {
-      "content": "Your response text",
-      "category": "guidance|motivation|resource|advice"
-    }`
+    let reply =
+      'I can help you with career guidance, coding, roadmap, projects, and placements.'
 
-    const completion = await zai.chat.completions.create({
-      messages: [
-        {
-          role: 'system',
-          content: systemPrompt
-        },
-        {
-          role: 'user',
-          content: message
-        }
-      ],
-      temperature: 0.8,
-    })
+    if (
+      message.includes('java')
+    ) {
 
-    const responseText = completion.choices[0]?.message?.content || ''
-    
-    let response
-    try {
-      response = JSON.parse(responseText)
-    } catch (error) {
-      // Fallback if JSON parsing fails
-      response = {
-        content: responseText,
-        category: 'guidance'
-      }
+      reply =
+        'For Java Full Stack, focus on Java, Spring Boot, React, MySQL, REST APIs, and projects.'
+
+    } else if (
+      message.includes('resume')
+    ) {
+
+      reply =
+        'Keep your resume one page, add projects, skills, internships, and achievements.'
+
+    } else if (
+      message.includes('project')
+    ) {
+
+      reply =
+        'Build 2-3 strong full stack projects with authentication, APIs, database, and deployment.'
+
+    } else if (
+      message.includes('placement')
+    ) {
+
+      reply =
+        'Practice DSA, aptitude, communication, and mock interviews consistently.'
+
+    } else if (
+      message.includes('roadmap')
+    ) {
+
+      reply =
+        'Your roadmap should include fundamentals, projects, advanced development, and interview preparation.'
+
+    } else if (
+      message.includes('hello')
+    ) {
+
+      reply =
+        'Hello Sonam 👋 How can I help you today?'
+
     }
 
     return NextResponse.json({
-      success: true,
-      response
+      reply,
     })
 
   } catch (error) {
-    console.error('AI chat error:', error)
-    
-    // Fallback response
-    const fallbackResponses = [
-      {
-        content: "I'm here to help you on your learning journey! Could you tell me more about what you're working on right now?",
-        category: "guidance"
-      },
-      {
-        content: "Every expert was once a beginner! You're doing great by taking this step. What specific challenge can I help you with today?",
-        category: "motivation"
-      },
-      {
-        content: "Learning new skills takes time and patience. Remember to celebrate small wins along the way! What would you like to focus on?",
-        category: "motivation"
-      }
-    ]
-    
-    const randomResponse = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)]
-    
+
     return NextResponse.json({
-      success: true,
-      response: randomResponse
+      reply:
+        'AI could not respond.',
     })
   }
 }

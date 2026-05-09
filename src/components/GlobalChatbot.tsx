@@ -2,80 +2,83 @@
 
 import { useState } from 'react'
 
+interface Message {
+  text: string
+  type: 'user' | 'bot'
+}
+
 export default function GlobalChatbot() {
-  const [open, setOpen] =
+  const [open, setOpen] = useState(false)
+
+  const [loading, setLoading] =
     useState(false)
 
+  const [input, setInput] =
+    useState('')
+
   const [messages, setMessages] =
-    useState([
+    useState<Message[]>([
       {
-        text: 'Hi 👋 How can I help you?',
+        text:
+          '👋 Hi! I am your SkillSage AI Mentor. Ask me anything about career, roadmap, coding, projects, placement, or learning.',
         type: 'bot',
-        options: [
-          'Resume Help',
-          'Roadmap Help',
-          'Courses',
-          'Stress Help',
-          'Other',
-        ],
       },
     ])
 
-  const reply = (
-    option: string
-  ) => {
-    setMessages((prev: any) => [
+  const sendMessage = async () => {
+    if (!input.trim()) return
+
+    const userMessage = input
+
+    setMessages((prev) => [
       ...prev,
       {
-        text: option,
+        text: userMessage,
         type: 'user',
       },
     ])
 
-    let bot = 'Please contact counselor.'
+    setInput('')
+    setLoading(true)
 
-    if (
-      option ===
-      'Resume Help'
-    )
-      bot =
-        'Upload resume from Dashboard → Upload Resume.'
+    try {
+      const response =
+        await fetch('/api/ai/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type':
+              'application/json',
+          },
+          body: JSON.stringify({
+            message: userMessage,
+          }),
+        })
 
-    if (
-      option ===
-      'Roadmap Help'
-    )
-      bot =
-        'Generate roadmap after setting goal.'
+      const data =
+        await response.json()
 
-    if (
-      option ===
-      'Courses'
-    )
-      bot =
-        'Recommended: Web Dev, Data Science, AI.'
+      setMessages((prev) => [
+        ...prev,
+        {
+          text:
+            data?.response
+              ?.content ||
+            'AI could not respond.',
+          type: 'bot',
+        },
+      ])
+    } catch (error) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          text:
+            '⚠️ Something went wrong while talking to AI.',
+          type: 'bot',
+        },
+      ])
+    }
 
-    if (
-      option ===
-      'Stress Help'
-    )
-      bot =
-        'Take breaks, stay consistent, talk to counselor.'
-
-    setMessages((prev: any) => [
-      ...prev,
-      {
-        text: bot,
-        type: 'bot',
-        options: [
-          'Resume Help',
-          'Roadmap Help',
-          'Courses',
-          'Stress Help',
-          'Other',
-        ],
-      },
-    ])
+    setLoading(false)
   }
 
   return (
@@ -90,71 +93,92 @@ export default function GlobalChatbot() {
         AI Guide
       </button>
 
-      {/* Chat Box */}
+      {/* Chat Window */}
       {open && (
-        <div className="fixed bottom-20 right-5 z-50 w-[370px] h-[520px] bg-white rounded-3xl shadow-2xl border flex flex-col">
+        <div className="fixed bottom-20 right-5 z-50 w-[380px] h-[600px] bg-white rounded-3xl shadow-2xl border flex flex-col overflow-hidden">
 
-          <div className="p-4 border-b flex justify-between items-center">
+          {/* Header */}
+          <div className="p-4 border-b flex justify-between items-center bg-white">
             <h2 className="font-bold text-blue-600 text-lg">
-              AI Guide
+              SkillSage AI
             </h2>
 
             <button
               onClick={() =>
                 setOpen(false)
               }
-              className="text-xl"
+              className="text-2xl"
             >
               ×
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4 space-y-3">
+          {/* Messages */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
 
             {messages.map(
-              (
-                msg: any,
-                i
-              ) => (
+              (msg, i) => (
                 <div
                   key={i}
-                  className={`p-3 rounded-2xl ${
+                  className={`flex ${
                     msg.type ===
-                    'bot'
-                      ? 'bg-gray-100'
-                      : 'bg-blue-100 ml-10'
+                    'user'
+                      ? 'justify-end'
+                      : 'justify-start'
                   }`}
                 >
-                  <p>
+                  <div
+                    className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm whitespace-pre-wrap ${
+                      msg.type ===
+                      'user'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-white border'
+                    }`}
+                  >
                     {msg.text}
-                  </p>
-
-                  {msg.options && (
-                    <div className="flex flex-wrap gap-2 mt-3">
-                      {msg.options.map(
-                        (
-                          item: string
-                        ) => (
-                          <button
-                            key={
-                              item
-                            }
-                            onClick={() =>
-                              reply(
-                                item
-                              )
-                            }
-                            className="px-3 py-1 rounded-xl border text-sm hover:bg-blue-50"
-                          >
-                            {item}
-                          </button>
-                        )
-                      )}
-                    </div>
-                  )}
+                  </div>
                 </div>
               )
             )}
+
+            {loading && (
+              <div className="bg-white border px-4 py-3 rounded-2xl w-fit text-sm">
+                Thinking...
+              </div>
+            )}
+          </div>
+
+          {/* Input */}
+          <div className="p-3 border-t flex gap-2 bg-white">
+            <input
+              type="text"
+              placeholder="Ask anything..."
+              value={input}
+              onChange={(e) =>
+                setInput(
+                  e.target.value
+                )
+              }
+              onKeyDown={(e) => {
+                if (
+                  e.key ===
+                  'Enter'
+                ) {
+                  sendMessage()
+                }
+              }}
+              className="flex-1 border rounded-xl px-4 py-2 outline-none"
+            />
+
+            <button
+              onClick={
+                sendMessage
+              }
+              disabled={loading}
+              className="bg-blue-600 text-white px-4 py-2 rounded-xl"
+            >
+              Send
+            </button>
           </div>
         </div>
       )}
