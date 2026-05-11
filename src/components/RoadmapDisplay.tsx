@@ -1,38 +1,25 @@
 'use client'
 
-import { useState } from 'react'
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
 
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Progress } from '@/components/ui/progress'
 
 import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs'
-
-import {
-  CheckCircle,
-  Circle,
+  CheckCircle2,
   Clock,
+  Briefcase,
+  IndianRupee,
+  Trophy,
   BookOpen,
-  ExternalLink,
-  Star,
-  Target,
-  Lightbulb,
-  Award,
+  Code2,
 } from 'lucide-react'
 
-interface RoadmapDisplayProps {
+interface Props {
   roadmap: any
   onStartLearning?: () => void
 }
@@ -40,433 +27,309 @@ interface RoadmapDisplayProps {
 export default function RoadmapDisplay({
   roadmap,
   onStartLearning,
-}: RoadmapDisplayProps) {
-  /* ---------- SAFETY ---------- */
+}: Props) {
 
-  if (
-    !roadmap ||
-    !roadmap.milestones ||
-    !Array.isArray(roadmap.milestones)
-  ) {
-    return (
-      <Card>
-        <CardContent className="p-10 text-center">
-          <h2 className="text-xl font-semibold mb-2">
-            No Roadmap Found
-          </h2>
-          <p className="text-gray-500">
-            Please select a course and generate roadmap first.
-          </p>
-        </CardContent>
-      </Card>
-    )
+  if (!roadmap) {
+    return null
   }
 
-  const [activeMilestone, setActiveMilestone] =
-    useState(
-      roadmap.milestones[0]?.id || 1
-    )
-
-  const completedMilestones =
-    roadmap.milestones.filter(
-      (m: any) => m.completed
-    ).length
-
-  const totalMilestones =
-    roadmap.milestones.length
-
-  const overallProgress =
-    totalMilestones > 0
-      ? (completedMilestones /
-          totalMilestones) *
-        100
-      : 0
-
-  const currentMilestone =
-    roadmap.milestones.find(
-      (m: any) =>
-        m.id === activeMilestone
-    )
-
   return (
-    <div className="space-y-6">
+
+    <div className="space-y-8 animate-in fade-in duration-700">
 
       {/* HEADER */}
-      <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
-        <CardHeader>
-          <div className="flex justify-between items-center gap-4">
+
+      <Card className="border-2 border-blue-100 shadow-lg">
+
+        <CardContent className="p-8">
+
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
+
             <div>
-              <CardTitle className="text-2xl text-blue-900">
+
+              <h1 className="text-4xl font-bold text-gray-900">
                 {roadmap.title}
-              </CardTitle>
+              </h1>
 
-              <CardDescription className="text-blue-700 mt-1">
-                Duration: {roadmap.duration} •{' '}
-                {totalMilestones} Milestones
-              </CardDescription>
-            </div>
-
-            <div className="text-right">
-              <p className="text-3xl font-bold text-blue-900">
-                {overallProgress.toFixed(
-                  0
-                )}
-                %
+              <p className="text-gray-600 mt-3 text-lg">
+                Personalized AI-generated career roadmap
               </p>
 
-              <p className="text-sm text-blue-700">
-                Complete
-              </p>
             </div>
+
+            <div className="flex flex-wrap gap-3">
+
+              <Badge className="bg-blue-600 text-white text-sm px-4 py-2">
+                <Clock className="w-4 h-4 mr-2" />
+                {roadmap.timeline}
+              </Badge>
+
+              <Badge className="bg-green-600 text-white text-sm px-4 py-2">
+                <IndianRupee className="w-4 h-4 mr-2" />
+                {roadmap.salary}
+              </Badge>
+
+            </div>
+
           </div>
+
+        </CardContent>
+
+      </Card>
+
+      {/* JOB ROLES */}
+
+      <Card>
+
+        <CardHeader>
+
+          <CardTitle className="flex items-center gap-2">
+            <Briefcase className="w-5 h-5 text-blue-600" />
+            Target Job Roles
+          </CardTitle>
+
         </CardHeader>
 
         <CardContent>
-          <Progress
-            value={overallProgress}
-            className="h-3"
-          />
 
-          <p className="text-sm text-blue-700 mt-2">
-            {completedMilestones} of{' '}
-            {totalMilestones} milestones completed
-          </p>
+          <div className="flex flex-wrap gap-3">
+
+            {roadmap.roles?.map(
+              (
+                role: string,
+                index: number
+              ) => (
+
+                <Badge
+                  key={index}
+                  className="px-4 py-2 text-sm bg-gray-900 text-white"
+                >
+                  {role}
+                </Badge>
+              )
+            )}
+
+          </div>
+
         </CardContent>
+
       </Card>
 
-      {/* TABS */}
-      <Tabs
-        defaultValue="milestones"
-        className="space-y-6"
-      >
-        <TabsList className="grid grid-cols-3 w-full">
-          <TabsTrigger value="milestones">
-            Learning Path
-          </TabsTrigger>
+      {/* ROADMAP STEPS */}
 
-          <TabsTrigger value="resources">
-            Resources
-          </TabsTrigger>
+      <div className="space-y-8">
 
-          <TabsTrigger value="advice">
-            Tips & Advice
-          </TabsTrigger>
-        </TabsList>
+        {roadmap.milestones?.map(
+          (
+            milestone: any,
+            index: number
+          ) => (
 
-        {/* MILESTONES */}
-        <TabsContent value="milestones">
-          <div className="space-y-6">
+            <Card
+              key={index}
+              className="overflow-hidden border-l-[8px] border-blue-600 shadow-md"
+            >
 
-            {/* NAV */}
-            <div className="flex gap-2 overflow-x-auto pb-2">
-              {roadmap.milestones.map(
-                (milestone: any) => (
-                  <Button
-                    key={milestone.id}
-                    size="sm"
-                    variant={
-                      activeMilestone ===
-                      milestone.id
-                        ? 'default'
-                        : 'outline'
-                    }
-                    onClick={() =>
-                      setActiveMilestone(
-                        milestone.id
+              <CardHeader className="bg-blue-50">
+
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+
+                  <div>
+
+                    <CardTitle className="text-2xl">
+                      {milestone.level}
+                    </CardTitle>
+
+                    <p className="text-gray-600 mt-1">
+                      {milestone.duration}
+                    </p>
+
+                  </div>
+
+                  <Badge className="bg-blue-600 text-white px-4 py-2">
+                    Phase {index + 1}
+                  </Badge>
+
+                </div>
+
+              </CardHeader>
+
+              <CardContent className="p-6 space-y-8">
+
+                {/* SKILLS */}
+
+                <div>
+
+                  <h3 className="font-bold text-lg flex items-center gap-2 mb-4">
+                    <Code2 className="w-5 h-5 text-blue-600" />
+                    Required Skills
+                  </h3>
+
+                  <div className="flex flex-wrap gap-3">
+
+                    {milestone.skills?.map(
+                      (
+                        skill: string,
+                        i: number
+                      ) => (
+
+                        <Badge
+                          key={i}
+                          className="bg-gray-100 text-black border px-3 py-1"
+                        >
+                          {skill}
+                        </Badge>
                       )
-                    }
-                  >
-                    {milestone.completed ? (
-                      <CheckCircle className="w-4 h-4 mr-2" />
-                    ) : (
-                      <Circle className="w-4 h-4 mr-2" />
                     )}
 
-                    {milestone.title}
-                  </Button>
-                )
-              )}
-            </div>
-
-            {/* ACTIVE CARD */}
-            {currentMilestone && (
-              <Card className="border-l-4 border-l-blue-500">
-                <CardHeader>
-                  <div className="flex justify-between gap-4">
-
-                    <div>
-                      <CardTitle>
-                        {
-                          currentMilestone.title
-                        }
-                      </CardTitle>
-
-                      <CardDescription>
-                        {
-                          currentMilestone.description
-                        }
-                      </CardDescription>
-                    </div>
-
-                    <Badge variant="outline">
-                      <Clock className="w-3 h-3 mr-1" />
-                      {
-                        currentMilestone.duration
-                      }
-                    </Badge>
-                  </div>
-                </CardHeader>
-
-                <CardContent className="space-y-6">
-
-                  {/* SKILLS */}
-                  <div>
-                    <h4 className="font-semibold mb-3 flex items-center">
-                      <Target className="w-4 h-4 mr-2" />
-                      Skills to Master
-                    </h4>
-
-                    <div className="flex flex-wrap gap-2">
-                      {currentMilestone.skills?.map(
-                        (
-                          skill: string,
-                          i: number
-                        ) => (
-                          <Badge
-                            key={i}
-                            variant="secondary"
-                          >
-                            {skill}
-                          </Badge>
-                        )
-                      )}
-                    </div>
                   </div>
 
-                  {/* COURSES */}
-                  <div>
-                    <h4 className="font-semibold mb-3 flex items-center">
-                      <BookOpen className="w-4 h-4 mr-2" />
-                      Recommended Courses
-                    </h4>
+                </div>
 
-                    <div className="space-y-3">
-                      {currentMilestone.courses?.map(
-                        (
-                          course: any,
-                          i: number
-                        ) => (
-                          <Card
-                            key={i}
-                            className="p-4"
-                          >
-                            <div className="flex justify-between gap-4">
+                {/* TOOLS */}
 
-                              <div>
-                                <h5 className="font-medium">
-                                  {
-                                    course.title
-                                  }
-                                </h5>
+                <div>
 
-                                <div className="flex gap-3 mt-2 text-sm text-gray-500 flex-wrap">
-                                  <span>
-                                    {
-                                      course.provider
-                                    }
-                                  </span>
+                  <h3 className="font-bold text-lg mb-4">
+                    Tools & Technologies
+                  </h3>
 
-                                  <span>
-                                    {
-                                      course.duration
-                                    }
-                                  </span>
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
 
-                                  <span className="flex items-center">
-                                    <Star className="w-4 h-4 text-yellow-500 mr-1" />
-                                    {
-                                      course.rating
-                                    }
-                                  </span>
-                                </div>
-                              </div>
+                    {milestone.tools?.map(
+                      (
+                        tool: string,
+                        i: number
+                      ) => (
 
-                              <Button
-                                size="sm"
-                                variant="outline"
-                              >
-                                <ExternalLink className="w-4 h-4 mr-2" />
-                                View
-                              </Button>
-                            </div>
-                          </Card>
-                        )
-                      )}
-                    </div>
+                        <div
+                          key={i}
+                          className="border rounded-xl p-4 bg-gray-50"
+                        >
+                          {tool}
+                        </div>
+                      )
+                    )}
+
                   </div>
 
-                  {/* RESOURCES */}
-                  <div>
-                    <h4 className="font-semibold mb-3 flex items-center">
-                      <Lightbulb className="w-4 h-4 mr-2" />
-                      Additional Resources
-                    </h4>
+                </div>
 
-                    <div className="grid md:grid-cols-3 gap-3">
-                      {currentMilestone.resources?.map(
-                        (
-                          item: string,
-                          i: number
-                        ) => (
-                          <Card
-                            key={i}
-                            className="p-3 text-center"
-                          >
-                            <p className="text-sm font-medium">
-                              {item}
+                {/* PROJECTS */}
+
+                <div>
+
+                  <h3 className="font-bold text-lg mb-4">
+                    Real-World Projects
+                  </h3>
+
+                  <div className="space-y-3">
+
+                    {milestone.projects?.map(
+                      (
+                        project: string,
+                        i: number
+                      ) => (
+
+                        <div
+                          key={i}
+                          className="flex items-start gap-3 border rounded-xl p-4"
+                        >
+
+                          <CheckCircle2 className="w-5 h-5 text-green-600 mt-1" />
+
+                          <div>
+                            <p className="font-medium">
+                              {project}
                             </p>
-                          </Card>
-                        )
-                      )}
-                    </div>
+                          </div>
+
+                        </div>
+                      )
+                    )}
+
                   </div>
 
-                  {/* ACTIONS */}
-                  <Button
-                  className="flex-1"
-                  onClick={onStartLearning}
-                  >
-                  Start Learning
-                  </Button>
-                  
-                  <div>
-                    <Button variant="outline">
-                      Mark Complete
-                    </Button>
+                </div>
+
+                {/* CERTIFICATIONS */}
+
+                <div>
+
+                  <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+                    <Trophy className="w-5 h-5 text-yellow-600" />
+                    Recommended Certifications
+                  </h3>
+
+                  <div className="flex flex-wrap gap-3">
+
+                    {milestone.certifications?.map(
+                      (
+                        cert: string,
+                        i: number
+                      ) => (
+
+                        <Badge
+                          key={i}
+                          className="bg-yellow-100 text-black border"
+                        >
+                          {cert}
+                        </Badge>
+                      )
+                    )}
+
                   </div>
 
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </TabsContent>
+                </div>
 
-        {/* RESOURCES TAB */}
-        <TabsContent value="resources">
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                All Resources
-              </CardTitle>
-            </CardHeader>
+                {/* INTERVIEW */}
 
-            <CardContent className="space-y-3">
-              {roadmap.milestones.map(
-                (
-                  milestone: any,
-                  idx: number
-                ) => (
-                  <div
-                    key={idx}
-                    className="border rounded-lg p-4"
-                  >
-                    <h4 className="font-semibold mb-2">
-                      {
-                        milestone.title
-                      }
-                    </h4>
+                <div>
 
-                    <div className="flex flex-wrap gap-2">
-                      {milestone.resources?.map(
-                        (
-                          r: string,
-                          i: number
-                        ) => (
-                          <Badge
-                            key={i}
-                            variant="outline"
-                          >
-                            {r}
-                          </Badge>
-                        )
-                      )}
-                    </div>
+                  <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+                    <BookOpen className="w-5 h-5 text-purple-600" />
+                    Interview Preparation
+                  </h3>
+
+                  <div className="space-y-3">
+
+                    {milestone.interview?.map(
+                      (
+                        item: string,
+                        i: number
+                      ) => (
+
+                        <div
+                          key={i}
+                          className="bg-purple-50 border rounded-xl p-4"
+                        >
+                          {item}
+                        </div>
+                      )
+                    )}
+
                   </div>
-                )
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
 
-        {/* ADVICE TAB */}
-        <TabsContent value="advice">
-          <div className="grid md:grid-cols-2 gap-6">
+                </div>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Lightbulb className="w-5 h-5 mr-2" />
-                  Pro Tips
-                </CardTitle>
-              </CardHeader>
-
-              <CardContent className="space-y-3">
-                {roadmap.recommendations?.tips?.map(
-                  (
-                    tip: string,
-                    i: number
-                  ) => (
-                    <div
-                      key={i}
-                      className="flex gap-3"
-                    >
-                      <div className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 text-xs font-bold flex items-center justify-center">
-                        {i + 1}
-                      </div>
-
-                      <p className="text-sm">
-                        {tip}
-                      </p>
-                    </div>
-                  )
-                )}
               </CardContent>
+
             </Card>
+          )
+        )}
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Award className="w-5 h-5 mr-2" />
-                  Career Advice
-                </CardTitle>
-              </CardHeader>
+      </div>
 
-              <CardContent className="space-y-3">
-                {roadmap.recommendations?.advice?.map(
-                  (
-                    item: string,
-                    i: number
-                  ) => (
-                    <div
-                      key={i}
-                      className="flex gap-3"
-                    >
-                      <div className="w-6 h-6 rounded-full bg-green-100 text-green-600 text-xs font-bold flex items-center justify-center">
-                        {i + 1}
-                      </div>
-
-                      <p className="text-sm">
-                        {item}
-                      </p>
-                    </div>
-                  )
-                )}
-              </CardContent>
-            </Card>
-
-          </div>
-        </TabsContent>
-      </Tabs>
+      {onStartLearning && (
+        <div className="flex justify-center pt-6">
+          <button
+            onClick={onStartLearning}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl font-semibold transition"
+          >
+            Start Learning Journey
+          </button>
+        </div>
+      )}
     </div>
   )
 }

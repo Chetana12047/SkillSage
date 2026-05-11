@@ -51,9 +51,13 @@ npm install
 
 # 2. Start development server
 # NOTE: Use 'npm run dev' or 'npx tsx server.ts' if 'npm run dev' fails.
+<<<<<<< HEAD
+npm run dev    
+=======
 npm run dev
 
 ## Contributors
 - Sonam Yadav
 - Chetana Ingle
 - Sakshi Nimsadkar
+>>>>>>> 6183d8922cdfcd79e78cc49e239aeef9cead8261
