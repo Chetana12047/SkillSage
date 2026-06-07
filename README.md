@@ -268,19 +268,6 @@ This project demonstrates practical implementation of:
 
 ---
 
-## 👨‍💻 Team Members
-
-| Name | Role |
-|--------|--------|
-| Sonam Yadav | Full Stack Development |
-| Team Member 2 | Frontend Development |
-| Team Member 3 | Backend Development |
-| Team Member 4 | Testing & Documentation |
-
-> Update the team member details according to your project group.
-
----
-
 ## 📚 Conclusion
 
 SkillSage is an intelligent career development platform that transforms career aspirations into structured, actionable learning journeys. By combining resume analysis, skill-gap detection, roadmap generation, and AI-powered guidance, the platform helps learners make informed decisions and become industry-ready professionals.
