@@ -5,11 +5,15 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 
 interface GoalSettingProps {
-  onGoalSet: (data: {
-    goal: string
-    duration: string
-    roadmap: any
-  }) => void
+  onGoalSet: (data: any) => void
+
+  savedGoal?: string
+
+  savedDuration?: string
+
+  currentSkills?: string[]
+
+  userId?: string
 }
 
 const goals = [
@@ -64,6 +68,7 @@ const durations = [
 
 export default function GoalSetting({
   onGoalSet,
+  userId,
 }: GoalSettingProps) {
 
   const [selectedGoal, setSelectedGoal] =
@@ -120,12 +125,10 @@ export default function GoalSetting({
               },
 
               body: JSON.stringify({
-                goal:
-                  finalGoal,
-
-                timeline:
-                  selectedDuration,
-              }),
+              goal: finalGoal,
+              duration: selectedDuration,
+              userId,
+            }),
             }
           )
 

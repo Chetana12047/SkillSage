@@ -1,5 +1,7 @@
 'use client'
 
+import RoadmapJourney from "./Journey";
+
 import {
   Card,
   CardContent,
@@ -18,6 +20,7 @@ import {
   BookOpen,
   Code2,
 } from 'lucide-react'
+
 
 interface Props {
   roadmap: any
@@ -77,6 +80,10 @@ export default function RoadmapDisplay({
 
       </Card>
 
+      <RoadmapJourney
+        roadmap={roadmap}
+      />
+  
       {/* JOB ROLES */}
 
       <Card>

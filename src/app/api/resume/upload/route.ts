@@ -1,3 +1,5 @@
+import { parseResume } from "@/lib/resume-parser";
+import { analyzeResume } from "@/lib/resume-analyzer";
 import { NextRequest, NextResponse } from "next/server";
 import { v2 as cloudinary } from "cloudinary";
 import { db } from "@/lib/db";
@@ -164,27 +166,72 @@ export async function POST(req: NextRequest) {
         }
       );
 
-    /* ---------- SAVE DB ---------- */
+      /* ---------- ANALYZE RESUME ---------- */
 
-    const user =
-      await db.user.update({
-        where: {
-          email:
-            session.user.email,
-        },
-        data: {
-          resumeUrl:
-            uploadRes.secure_url,
-        },
+      let resumeText = "";
+      let detectedSkills: string[] = [];
+      let currentLevel = "Beginner";
+
+      try {
+        resumeText =
+          await parseResume(buffer);
+
+        const analysis =
+          analyzeResume(
+            resumeText
+          );
+
+        detectedSkills =
+          analysis.skills;
+
+        currentLevel =
+          analysis.level;
+
+      } catch (err) {
+        console.log(
+          "Resume parsing failed:",
+          err
+        );
+      }
+
+      /* ---------- SAVE DB ---------- */
+
+      const user =
+        await db.user.update({
+          where: {
+            email:
+              session.user.email,
+          },
+          data: {
+            resumeUrl:
+              uploadRes.secure_url,
+
+            resumeText,
+
+            skills:
+            detectedSkills.join(","),
+
+            currentLevel,
+          },
+        });
+
+      return NextResponse.json({
+        success: true,
+
+        url:
+          uploadRes.secure_url,
+
+        publicId:
+          uploadRes.public_id,
+
+        skills:
+          detectedSkills,
+
+        level:
+          currentLevel,
+
+        user,
       });
-
-    return NextResponse.json({
-      success: true,
-      url: uploadRes.secure_url,
-      publicId:
-        uploadRes.public_id,
-      user,
-    });
   } catch (error) {
     console.log(error);
 

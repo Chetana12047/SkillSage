@@ -9,13 +9,11 @@ export default function RoadmapJourney({
 
   return (
     <div className="bg-white rounded-2xl p-8 shadow border">
-
       <h2 className="text-3xl font-bold mb-8">
         Career Journey
       </h2>
 
       <div className="space-y-6">
-
         {roadmap.milestones?.map(
           (
             milestone: any,
@@ -41,7 +39,6 @@ export default function RoadmapJourney({
             </div>
           )
         )}
-
       </div>
     </div>
   );
