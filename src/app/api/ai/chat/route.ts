@@ -1,417 +1,125 @@
-import { NextRequest, NextResponse } from 'next/server'
-
-function generateRoadmap(
-  goal: string,
-  timeline: string
-) {
-
-  const lowerGoal =
-    goal.toLowerCase()
-
-  const isFast =
-    timeline.includes('3')
-
-  const isMedium =
-    timeline.includes('6')
-
-  const isLong =
-    timeline.includes('1')
-
-  // JAVA FULLSTACK
-
-  if (
-    lowerGoal.includes('java') ||
-    lowerGoal.includes('full')
-  ) {
-
-    return {
-
-      title:
-        'Java Full Stack Developer',
-
-      timeline,
-
-      salaryRange:
-        '₹6L - ₹25L',
-
-      jobRoles: [
-        'Java Developer',
-        'Backend Developer',
-        'Full Stack Engineer',
-      ],
-
-      phases: [
-
-        {
-          phase:
-            'Foundation',
-
-          duration:
-            isFast
-              ? '2 Weeks'
-              : '1 Month',
-
-          skills: [
-            'Java Basics',
-            'OOP',
-            'HTML',
-            'CSS',
-            'JavaScript',
-            'Git',
-          ],
-
-          tools: [
-            'VS Code',
-            'GitHub',
-            'IntelliJ',
-          ],
-
-          projects: [
-            'Portfolio Website',
-            'Student Management System',
-          ],
-
-          resources: [
-            'Apna College',
-            'MDN Docs',
-            'JavaTPoint',
-          ],
-
-          interviewPrep: [
-            'Java OOP',
-            'Collections',
-            'Basic DSA',
-          ],
-
-          certifications: [
-            'Java Foundations',
-          ],
-        },
-
-        {
-          phase:
-            'Backend Engineering',
-
-          duration:
-            isFast
-              ? '1 Month'
-              : '2 Months',
-
-          skills: [
-            'Spring Boot',
-            'REST APIs',
-            'JWT Auth',
-            'MySQL',
-          ],
-
-          tools: [
-            'Postman',
-            'MySQL Workbench',
-            'Render',
-          ],
-
-          projects: [
-            'Authentication System',
-            'E-commerce Backend',
-          ],
-
-          resources: [
-            'Spring Docs',
-            'Baeldung',
-          ],
-
-          interviewPrep: [
-            'DBMS',
-            'OS',
-            'API Questions',
-          ],
-
-          certifications: [
-            'Spring Boot',
-          ],
-        },
-
-        ...(isLong
-          ? [
-              {
-                phase:
-                  'Advanced Engineering',
-
-                duration:
-                  '4 Months',
-
-                skills: [
-                  'Docker',
-                  'AWS',
-                  'CI/CD',
-                  'System Design',
-                ],
-
-                tools: [
-                  'Docker',
-                  'AWS',
-                  'GitHub Actions',
-                ],
-
-                projects: [
-                  'Production SaaS App',
-                ],
-
-                resources: [
-                  'AWS Docs',
-                  'System Design Primer',
-                ],
-
-                interviewPrep: [
-                  'LLD',
-                  'HLD',
-                  'Advanced DSA',
-                ],
-
-                certifications: [
-                  'AWS Cloud Practitioner',
-                ],
-              },
-            ]
-          : []),
-      ],
-    }
-  }
-
-  // AI ENGINEER
-
-  if (
-    lowerGoal.includes('ai')
-  ) {
-
-    return {
-
-      title:
-        'AI Engineer',
-
-      timeline,
-
-      salaryRange:
-        '₹10L - ₹40L',
-
-      jobRoles: [
-        'AI Engineer',
-        'ML Engineer',
-        'LLM Engineer',
-      ],
-
-      phases: [
-
-        {
-          phase:
-            'Python & Data',
-
-          duration:
-            '1 Month',
-
-          skills: [
-            'Python',
-            'NumPy',
-            'Pandas',
-            'Statistics',
-          ],
-
-          tools: [
-            'VS Code',
-            'Jupyter',
-          ],
-
-          projects: [
-            'Data Analysis',
-            'Automation Scripts',
-          ],
-
-          resources: [
-            'Kaggle',
-            'Coursera',
-          ],
-
-          interviewPrep: [
-            'Python Basics',
-          ],
-
-          certifications: [
-            'Python Certification',
-          ],
-        },
-
-        {
-          phase:
-            'Machine Learning',
-
-          duration:
-            isFast
-              ? '1 Month'
-              : '3 Months',
-
-          skills: [
-            'ML',
-            'Scikit Learn',
-            'Data Visualization',
-          ],
-
-          tools: [
-            'Google Colab',
-            'Kaggle',
-          ],
-
-          projects: [
-            'Prediction System',
-            'Recommendation Engine',
-          ],
-
-          resources: [
-            'FastAI',
-            'Google ML Crash Course',
-          ],
-
-          interviewPrep: [
-            'ML Algorithms',
-          ],
-
-          certifications: [
-            'Machine Learning',
-          ],
-        },
-
-        ...(isLong
-          ? [
-              {
-                phase:
-                  'Advanced AI',
-
-                duration:
-                  '5 Months',
-
-                skills: [
-                  'Deep Learning',
-                  'Transformers',
-                  'LLMs',
-                  'Deployment',
-                ],
-
-                tools: [
-                  'PyTorch',
-                  'HuggingFace',
-                ],
-
-                projects: [
-                  'AI Chatbot',
-                  'Custom LLM',
-                ],
-
-                resources: [
-                  'HuggingFace Docs',
-                ],
-
-                interviewPrep: [
-                  'AI System Design',
-                ],
-
-                certifications: [
-                  'Deep Learning',
-                ],
-              },
-            ]
-          : []),
-      ],
-    }
-  }
-
-  // DEFAULT
-
-  return {
-
-    title: goal,
-
-    timeline,
-
-    salaryRange:
-      '₹5L - ₹15L',
-
-    jobRoles: [
-      goal,
-    ],
-
-    phases: [
-
-      {
-        phase:
-          'Foundation',
-
-        duration:
-          '1 Month',
-
-        skills: [
-          'Core Fundamentals',
-          'Projects',
-        ],
-
-        tools: [
-          'VS Code',
-          'GitHub',
-        ],
-
-        projects: [
-          'Starter Project',
-        ],
-
-        resources: [
-          'YouTube',
-          'Docs',
-        ],
-
-        interviewPrep: [
-          'Basics',
-        ],
-
-        certifications: [
-          'Foundation Certificate',
-        ],
-      },
-    ],
-  }
-}
-
-export async function POST(
-  request: NextRequest
-) {
-
+// src/app/api/ai/chat/route.ts
+// Uses Groq (FREE — 14,400 req/day, no credit card)
+// Get free key at: https://console.groq.com
+
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { db } from "@/lib/db";
+import { buildSkillSagePrompt } from "@/lib/prompt";
+
+const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
+const MODEL = "llama-3.3-70b-versatile";
+
+export async function POST(request: NextRequest) {
   try {
+    const apiKey = process.env.GROQ_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json(
+        { error: "GROQ_API_KEY is missing. Add it to .env.local and restart." },
+        { status: 500 }
+      );
+    }
 
-    const body =
-      await request.json()
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-    const {
-      goal,
-      timeline,
-    } = body
+    const { message, conversationHistory = [] } = await request.json();
+    if (!message?.trim()) {
+      return NextResponse.json({ error: "Message required" }, { status: 400 });
+    }
 
-    const roadmap =
-      generateRoadmap(
-        goal,
-        timeline
-      )
-
-    return NextResponse.json(
-      roadmap
-    )
-
-  } catch (error) {
-
-    return NextResponse.json(
-      {
-        error:
-          'Roadmap generation failed',
+    // Load user context from DB
+    const user = await db.user.findUnique({
+      where: { email: session.user.email },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        goal: true,
+        skills: true,
+        manualSkills: true,
+        experience: true,
+        education: true,
+        selectedCourse: true,
+        roadmapData: true,
+        progressData: true,
       },
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    // Build personalised system prompt using existing prompt.ts
+    const systemPrompt = buildSkillSagePrompt(
       {
-        status: 500,
-      }
-    )
+        name: user.name,
+        email: user.email,
+        goal: user.goal,
+        skills: user.skills ? user.skills.split(",").map((s) => s.trim()) : [],
+        experience: user.experience,
+        education: user.education,
+        selectedCourse: user.selectedCourse
+          ? (() => { try { return JSON.parse(user.selectedCourse!); } catch { return user.selectedCourse; } })()
+          : null,
+        roadmapData: user.roadmapData,
+        progressData: user.progressData,
+      },
+      message
+    );
+
+    // Build messages array with conversation history
+    const messages = [
+      { role: "system", content: systemPrompt },
+      ...conversationHistory.slice(-8).map((m: any) => ({
+        role: m.role === "assistant" ? "assistant" : "user",
+        content: m.content,
+      })),
+      { role: "user", content: message },
+    ];
+
+    const groqRes = await fetch(GROQ_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        messages,
+        temperature: 0.7,
+        max_tokens: 1024,
+      }),
+    });
+
+    const groqData = await groqRes.json();
+
+    if (!groqRes.ok) {
+      console.error("[Chat] Groq error:", JSON.stringify(groqData));
+      return NextResponse.json(
+        { error: "Groq API error: " + (groqData?.error?.message || groqRes.status) },
+        { status: 500 }
+      );
+    }
+
+    const assistantMessage = groqData.choices?.[0]?.message?.content ?? "Sorry, I could not generate a response.";
+
+    // Save to chat history (non-fatal)
+    try {
+      await db.chatMessage.createMany({
+        data: [
+          { userId: user.id, role: "user", content: message },
+          { userId: user.id, role: "assistant", content: assistantMessage },
+        ],
+      });
+    } catch {}
+
+    return NextResponse.json({ message: assistantMessage });
+  } catch (error: any) {
+    console.error("[Chat] Unexpected error:", error);
+    return NextResponse.json({ error: "AI response failed", detail: error.message }, { status: 500 });
   }
 }
