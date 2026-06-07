@@ -1,63 +1,306 @@
- # SkillSage - The Adaptive Career Roadmap Generator
+# 🚀 SkillSage – Personalized AI Career Roadmap Generator
 
-SkillSage: AI-Powered Adaptive Career Roadmap Generator. Transforms resumes into personalized skill gap analyses and visual roadmaps with dynamic course recommendations.
+## 📌 Overview
 
-A modern, production-ready web application scaffold built on cutting-edge technologies, designed to accelerate the development of the SkillSage platform.
+SkillSage is an AI-powered career guidance and roadmap generation platform that helps students and aspiring professionals identify their current skill level, analyze resumes, discover skill gaps, and generate personalized learning roadmaps aligned with their career goals.
 
-## 1. Technology Stack
+The platform bridges the gap between a learner's current abilities and industry requirements by providing structured learning plans, progress tracking, resume intelligence, and AI-assisted career recommendations.
 
-This platform provides a robust foundation built with:
+---
 
-### Core Frameworks
-- **Next.js 15** - The React framework for production (App Router).
-- **TypeScript 5** - Type-safe JavaScript for better developer experience.
-- **Tailwind CSS 4** - Utility-first CSS framework for rapid UI development.
+## 🎯 Problem Statement
 
-### UI Components & Styling
-- **shadcn/ui** - High-quality, accessible components built on Radix UI.
-- **Lucide React** - Consistent icon library.
-- **Framer Motion** - Production-ready motion library for React.
-- **Next Themes** - Perfect dark mode integration.
+Students often face difficulties in:
 
-### Data & State Management
-- **Zustand** - Simple, scalable state management.
-- **TanStack Query** - Powerful data synchronization for React.
-- **Axios** - Promise-based HTTP client.
-- **React Hook Form** - Performant forms with easy validation.
-- **Zod** - TypeScript-first schema validation.
+- Identifying their current technical skill level
+- Understanding industry expectations
+- Choosing the right learning path
+- Tracking progress effectively
+- Preparing for job-ready roles
 
-### Database & Backend
-- **Prisma** - Next-generation Node.js and TypeScript ORM.
-- **NextAuth.js** - Complete open-source authentication solution.
+SkillSage solves these challenges by generating personalized career roadmaps based on user goals, skills, experience, and resume analysis.
 
-### Advanced Features
-- **TanStack Table** - Headless UI for building tables and datagrids.
-- **DND Kit** - Modern drag and drop toolkit for React.
-- **Recharts** - Redefined chart library built with React and D3.
-- **Sharp** - High performance image processing.
+---
 
-### Internationalization & Utilities
-- **Next Intl** - Internationalization library for Next.js.
-- **Date-fns** - Modern JavaScript date utility library.
-- **ReactUse** - Collection of essential React hooks for modern development.
+## ✨ Key Features
 
-## 2. Quick Start
+### 📄 Resume Intelligence
+- Resume upload (PDF/DOC/DOCX)
+- Automatic skill extraction
+- Resume parsing and analysis
+- Experience level detection
+- Cloud-based resume storage
 
-Ensure Node.js and npm are installed.
+### 🧠 AI-Powered Career Guidance
+- Personalized career recommendations
+- Skill gap identification
+- Dynamic roadmap generation
+- Goal-based learning paths
 
-```bash
-# 1. Install dependencies
-npm install
+### 🛣️ Adaptive Roadmap Generator
+- Career-specific roadmaps
+- Multiple timeline options
+  - 3 Months
+  - 6 Months
+  - 1 Year
+- Milestone-based progression
+- Industry-aligned skills and projects
 
-# 2. Start development server
-# NOTE: Use 'npm run dev' or 'npx tsx server.ts' if 'npm run dev' fails.
-<<<<<<< HEAD
-npm run dev    
-=======
-npm run dev
+### 📊 Skill Gap Analysis
+- Detect existing skills
+- Identify missing skills
+- Learning priority recommendations
+- Career readiness evaluation
 
-## Contributors
-- Sonam Yadav
-- Chetana Ingle
-- Sakshi Nimsadkar
->>>>>>> 6183d8922cdfcd79e78cc49e239aeef9cead8261
+### 📈 Progress Tracking
+- Milestone completion tracking
+- Roadmap progress monitoring
+- Learning analytics dashboard
+
+### 🤖 AI Career Companion
+- Interactive chatbot
+- Career guidance support
+- Learning assistance
+- Roadmap-related recommendations
+
+---
+
+## 🏗️ System Architecture
+
+```text
+User
+ │
+ ▼
+Frontend (Next.js + React)
+ │
+ ▼
+API Layer (Next.js API Routes)
+ │
+ ├── Resume Parser
+ ├── Resume Analyzer
+ ├── Skill Extractor
+ ├── Skill Gap Analyzer
+ ├── Roadmap Generator
+ └── AI Career Assistant
+ │
+ ▼
+Prisma ORM
+ │
+ ▼
+SQLite Database
+ │
+ ▼
+Cloudinary Storage
+```
+
+---
+
+## 🛠️ Technology Stack
+
+### Frontend
+- Next.js
+- React
+- TypeScript
+- Tailwind CSS
+- ShadCN UI
+
+### Backend
+- Node.js
+- Next.js API Routes
+
+### Database
+- Prisma ORM
+- SQLite
+
+### Authentication
+- NextAuth.js
+
+### Cloud Storage
+- Cloudinary
+
+### AI & Analysis Modules
+- Resume Parsing
+- Resume Analysis
+- Skill Extraction
+- Skill Gap Analysis
+- Adaptive Roadmap Generation
+
+---
+
+## 📂 Project Structure
+
+```text
+src
+│
+├── app
+│   ├── api
+│   ├── dashboard
+│   ├── login
+│   └── signup
+│
+├── components
+│   ├── ResumeUpload
+│   ├── GoalSetting
+│   ├── RoadmapDisplay
+│   ├── ReadinessScore
+│   ├── SkillAnalysisCard
+│   ├── SkillGapCard
+│   └── AICompanion
+│
+├── context
+│   └── RoadmapContext
+│
+├── lib
+│   ├── resume-parser
+│   ├── resume-analyzer
+│   ├── skill-extractor
+│   ├── skill-gap
+│   ├── roadmap-generator
+│   ├── readiness
+│   └── career-data
+│
+└── prisma
+```
+
+---
+
+## 🔄 Application Workflow
+
+### Step 1: User Registration
+- User creates an account.
+- Authentication handled through NextAuth.
+
+### Step 2: Resume Upload
+- Resume uploaded to Cloudinary.
+- Resume content extracted.
+- Skills identified automatically.
+
+### Step 3: Goal Selection
+Users can choose:
+- AI Engineer
+- Data Scientist
+- Java Full Stack Developer
+- Custom Career Goal
+
+### Step 4: Skill Gap Analysis
+
+```text
+Current Skills
+       VS
+Required Industry Skills
+```
+
+The system identifies:
+- Existing skills
+- Missing skills
+- Improvement areas
+
+### Step 5: Roadmap Generation
+
+The platform generates:
+- Learning phases
+- Required technologies
+- Project recommendations
+- Certifications
+- Interview preparation topics
+
+### Step 6: Progress Tracking
+
+Users can:
+- Track completed milestones
+- Monitor roadmap completion
+- View readiness score
+
+---
+
+## 📸 Core Modules
+
+### Resume Intelligence Module
+Extracts:
+- Skills
+- Technical keywords
+- Experience indicators
+
+### Skill Gap Analysis Module
+Calculates:
+- Existing skills
+- Missing skills
+- Career readiness
+
+### Adaptive Roadmap Engine
+Generates:
+- Personalized milestones
+- Learning plans
+- Project suggestions
+- Certification recommendations
+
+### Career Readiness Module
+Evaluates:
+- Skill completeness
+- Job readiness score
+- Improvement opportunities
+
+---
+
+## 🎓 Academic Significance
+
+This project demonstrates practical implementation of:
+
+- Software Engineering
+- Artificial Intelligence
+- Full Stack Web Development
+- Database Management Systems
+- Human Computer Interaction
+- Recommendation Systems
+
+---
+
+## 🚀 Future Enhancements
+
+- OpenAI / Gemini Integration
+- Real-Time Job Market Analysis
+- LinkedIn Profile Analysis
+- AI Interview Simulator
+- Personalized Study Planner
+- Course Recommendation Engine
+- Company-Specific Roadmaps
+- Advanced Learning Analytics
+
+---
+
+## 👨‍💻 Team Members
+
+| Name | Role |
+|--------|--------|
+| Sonam Yadav | Full Stack Development |
+| Team Member 2 | Frontend Development |
+| Team Member 3 | Backend Development |
+| Team Member 4 | Testing & Documentation |
+
+> Update the team member details according to your project group.
+
+---
+
+## 📚 Conclusion
+
+SkillSage is an intelligent career development platform that transforms career aspirations into structured, actionable learning journeys. By combining resume analysis, skill-gap detection, roadmap generation, and AI-powered guidance, the platform helps learners make informed decisions and become industry-ready professionals.
+
+---
+
+## ⭐ Final Year Engineering Project
+
+---
+
+## 👩‍💻 Developed By
+
+- **Sonam Yadav**
+- **Chetana Ingle**
+- **Sakshi Nimsadkar**
+
+**SkillSage – Personalized AI Career Roadmap Generator**
+
+**Academic Year:** 2025–2026  
+**Department:** Computer Engineering  
+**Institute:** Dr. D. Y. Patil Institute of Engineering, Management & Research, Akurdi, Pune
+
+---
