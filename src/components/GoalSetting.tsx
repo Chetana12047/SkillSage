@@ -3,62 +3,23 @@
 import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
+import { CheckCircle } from "lucide-react"
 
 interface GoalSettingProps {
   onGoalSet: (data: any) => void
 
-  savedGoal?: string
+  goal?: string
+
+  onChangeGoal?: () => void
 
   savedDuration?: string
+
+  savedWeeklyHours?: string
 
   currentSkills?: string[]
 
   userId?: string
 }
-
-const goals = [
-  {
-    title: "AI Engineer Professional",
-    description:
-      "LLMs, neural networks, deployment projects.",
-    priority: "Very High",
-  },
-
-  {
-    title: "Data Analyst Essentials",
-    description:
-      "Excel, dashboards, SQL, reporting.",
-    priority: "High",
-  },
-
-  {
-    title: "Professional Data Science Program",
-    description:
-      "Python, ML, statistics, real projects.",
-    priority: "Very High",
-  },
-
-  {
-    title: "Cybersecurity Fundamentals",
-    description:
-      "Security basics, threats, networks.",
-    priority: "High",
-  },
-
-  {
-    title: "Ethical Hacking Mastery",
-    description:
-      "Pen testing, Kali Linux, SOC tools.",
-    priority: "Very High",
-  },
-
-  {
-    title: "Software Developer Career Track",
-    description:
-      "Coding, OOP, Git, projects.",
-    priority: "Very High",
-  },
-]
 
 const durations = [
   "3 months",
@@ -66,48 +27,54 @@ const durations = [
   "1 year",
 ]
 
+const weeklyHourOptions = [
+  { value: "1-3 hrs/week", label: "1–3 hrs/week", desc: "Light pace, around other commitments" },
+  { value: "4-7 hrs/week", label: "4–7 hrs/week", desc: "Steady, a few hours most days" },
+  { value: "8-15 hrs/week", label: "8–15 hrs/week", desc: "Focused, several hours daily" },
+  { value: "15+ hrs/week", label: "15+ hrs/week", desc: "Intensive, near full-time effort" },
+]
+
 export default function GoalSetting({
   onGoalSet,
+  goal,
+  onChangeGoal,
+  savedDuration,
+  savedWeeklyHours,
+  currentSkills,
   userId,
 }: GoalSettingProps) {
 
-  const [selectedGoal, setSelectedGoal] =
-    useState("")
-
-  const [customGoal, setCustomGoal] =
-    useState("")
-
   const [selectedDuration, setSelectedDuration] =
-    useState("")
+    useState(savedDuration || "")
+
+  const [selectedWeeklyHours, setSelectedWeeklyHours] =
+    useState(savedWeeklyHours || "")
 
   const [loading, setLoading] =
     useState(false)
 
-  const handleGoalSelect = (
-    goal: string
-  ) => {
-
-    setSelectedGoal(goal)
-    setCustomGoal(goal)
-  }
+  const [error, setError] =
+    useState("")
 
   const handleGenerate =
     async () => {
 
-      const finalGoal =
-        customGoal || selectedGoal
-
       if (
-        !finalGoal ||
-        !selectedDuration
+        !goal ||
+        !selectedDuration ||
+        !selectedWeeklyHours
       ) {
 
-        alert(
-          "Please select goal and timeline"
+        setError(
+          !goal
+            ? "No career goal found — please set one on the Upload Resume step first."
+            : "Please select a timeline and weekly time commitment."
         )
 
         return
       }
+
+      setError("")
 
       try {
 
@@ -125,9 +92,11 @@ export default function GoalSetting({
               },
 
               body: JSON.stringify({
-              goal: finalGoal,
+              goal,
               duration: selectedDuration,
+              weeklyHours: selectedWeeklyHours,
               userId,
+              currentSkills,
             }),
             }
           )
@@ -143,11 +112,13 @@ export default function GoalSetting({
           await response.json()
 
         onGoalSet({
-          goal:
-            finalGoal,
+          goal,
 
           duration:
             selectedDuration,
+
+          weeklyHours:
+            selectedWeeklyHours,
 
           roadmap,
         })
@@ -157,6 +128,10 @@ export default function GoalSetting({
         console.log(
           "Roadmap Error:",
           error
+        )
+
+        setError(
+          "Something went wrong generating your roadmap. Please try again."
         )
 
       } finally {
@@ -172,119 +147,65 @@ export default function GoalSetting({
       <div>
 
         <h2 className="text-3xl font-bold mb-2">
-          Select Your Career Goal
+          Plan Your Timeline
         </h2>
 
         <p className="text-gray-500">
-          Choose a roadmap aligned with industry demand
+          Your goal is already set — now tell us your pace so we can build the right roadmap
         </p>
 
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-
-        {goals.map((goal) => (
-
-          <div
-            key={goal.title}
-            onClick={() =>
-              handleGoalSelect(goal.title)
-            }
-            className={`
-              cursor-pointer
-              rounded-3xl
-              border
-              p-6
-              transition-all
-              duration-300
-              hover:shadow-xl
-              hover:-translate-y-1
-              bg-white
-
-              ${
-                selectedGoal === goal.title
-                  ? "border-blue-600 ring-2 ring-blue-300"
-                  : "border-gray-200"
-              }
-            `}
-          >
-
-            <div className="flex items-center justify-between mb-4">
-
-              <div className="text-3xl">
-                💼
-              </div>
-
-              <span
-                className={`
-                  px-3 py-1 rounded-full text-xs font-semibold text-white
-
-                  ${
-                    goal.priority === "Very High"
-                      ? "bg-green-500"
-                      : "bg-blue-500"
-                  }
-                `}
-              >
-                {goal.priority}
-              </span>
-
-            </div>
-
-            <h3 className="text-xl font-bold mb-2">
-              {goal.title}
-            </h3>
-
-            <p className="text-gray-500">
-              {goal.description}
-            </p>
-
-          </div>
-        ))}
-      </div>
-
+      {/* ── Locked-in goal, carried over from Upload Resume step ── */}
       <div className="bg-white rounded-3xl border p-6">
 
-        <h3 className="text-xl font-bold mb-4">
-          Define your own goal
-        </h3>
+        <div className="flex items-center justify-between mb-1">
+          <h3 className="text-lg font-semibold text-gray-500">
+            Your Career Goal
+          </h3>
 
-        <div className="flex flex-col md:flex-row gap-4">
-
-          <input
-            type="text"
-            placeholder="Java Full Stack Developer"
-            value={customGoal}
-            onChange={(e) =>
-              setCustomGoal(
-                e.target.value
-              )
-            }
-            className="
-              flex-1
-              h-14
-              rounded-xl
-              border
-              border-gray-300
-              px-4
-              outline-none
-              focus:ring-2
-              focus:ring-blue-500
-            "
-          />
-
-          <Button
-            onClick={() =>
-              setSelectedGoal(customGoal)
-            }
-            className="h-14 px-8"
-          >
-            Use Goal
-          </Button>
-
+          {onChangeGoal && (
+            <button
+              type="button"
+              onClick={onChangeGoal}
+              className="text-sm text-blue-600 font-medium hover:underline"
+            >
+              Change
+            </button>
+          )}
         </div>
 
+        {goal ? (
+          <div className="flex items-center gap-3 mt-2 p-4 rounded-xl bg-gray-50 border">
+            <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+            <span className="text-xl font-bold">
+              {goal}
+            </span>
+          </div>
+        ) : (
+          <div className="mt-2 p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-sm">
+            No goal found yet.{" "}
+            {onChangeGoal ? (
+              <button
+                type="button"
+                onClick={onChangeGoal}
+                className="font-medium underline"
+              >
+                Go back and set one
+              </button>
+            ) : (
+              "Please set one on the Upload Resume step."
+            )}
+          </div>
+        )}
+
       </div>
+
+      {error && (
+        <div className="px-4 py-3 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm">
+          {error}
+        </div>
+      )}
 
       <div className="bg-white rounded-3xl border p-6">
 
@@ -333,29 +254,90 @@ export default function GoalSetting({
 
       </div>
 
+      <div className="bg-white rounded-3xl border p-6">
+
+        <h3 className="text-xl font-bold mb-1">
+          Weekly Time Commitment
+        </h3>
+
+        <p className="text-gray-500 mb-6">
+          How much time can you realistically dedicate each week?
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+          {weeklyHourOptions.map((opt) => (
+
+            <div
+              key={opt.value}
+              onClick={() =>
+                setSelectedWeeklyHours(opt.value)
+              }
+              className={`
+                cursor-pointer
+                rounded-2xl
+                border
+                p-5
+                transition-all
+                duration-300
+                hover:shadow-lg
+
+                ${
+                  selectedWeeklyHours === opt.value
+                    ? "border-blue-600 bg-blue-50"
+                    : "border-gray-200 bg-white"
+                }
+              `}
+            >
+
+              <div className="flex items-center justify-between">
+                <h4 className="text-lg font-bold">
+                  {opt.label}
+                </h4>
+
+                {selectedWeeklyHours === opt.value && (
+                  <CheckCircle className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                )}
+              </div>
+
+              <p className="text-sm text-gray-500 mt-1">
+                {opt.desc}
+              </p>
+
+            </div>
+          ))}
+        </div>
+
+      </div>
+
       <div className="bg-white rounded-3xl border p-8">
 
         <h2 className="text-2xl font-bold mb-6">
           Generate Career Roadmap
         </h2>
 
-        <div className="bg-slate-100 rounded-2xl p-6 mb-6">
+        <div className="bg-slate-100 rounded-2xl p-6 mb-6 space-y-2">
 
           <p className="text-lg">
             <b>Goal:</b>{" "}
-            {customGoal || selectedGoal || "Not Selected"}
+            {goal || "Not set"}
           </p>
 
-          <p className="text-lg mt-2">
+          <p className="text-lg">
             <b>Timeline:</b>{" "}
             {selectedDuration || "Not Selected"}
+          </p>
+
+          <p className="text-lg">
+            <b>Weekly Commitment:</b>{" "}
+            {selectedWeeklyHours || "Not Selected"}
           </p>
 
         </div>
 
         <Button
           onClick={handleGenerate}
-          disabled={loading}
+          disabled={loading || !goal}
           className="
             w-full
             h-14

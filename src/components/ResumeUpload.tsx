@@ -35,6 +35,13 @@ interface ResumeUploadProps {
   onReset?: () => void;
 }
 
+const EXPERIENCE_OPTIONS = [
+  "College Student",
+  "Recent Graduate",
+  "Fresher",
+  "Working Professional",
+];
+
 export default function ResumeUpload({
   onUpload,
   savedData,
@@ -55,7 +62,9 @@ export default function ResumeUpload({
   // Manual fields
   const [skills, setSkills] = useState("");
   const [goal, setGoal] = useState("");
+  const [goalLocked, setGoalLocked] = useState(false);
   const [experience, setExperience] = useState("College Student");
+  const [otherExperience, setOtherExperience] = useState("");
 
   const abortRef = useRef<AbortController | null>(null);
 
@@ -74,9 +83,39 @@ export default function ResumeUpload({
       setDetectedSkills(savedData.skills);
     }
 
-    setSkills(savedData.manualSkills || savedData.skills?.join(", ") || "");
-    setGoal(savedData.goal || "");
-    setExperience(savedData.experience || "College Student");
+    // Prefer the freshest, most complete source: AI-extracted skills (array)
+    // over manualSkills (a string that can go stale — e.g. left over from
+    // signup, or a smaller set typed in before a later, more thorough
+    // resume re-upload). Only fall back to manualSkills when there's no
+    // extracted skills array to show.
+    if (savedData.skills?.length > 0) {
+      setSkills(savedData.skills.join(", "));
+    } else {
+      setSkills(savedData.manualSkills || "");
+    }
+
+    const savedGoal = savedData.goal || "";
+    setGoal(savedGoal);
+    // A goal decided earlier (at signup, or by AI extraction) is locked by
+    // default — the user explicitly clicks "Change" to edit it here, so we
+    // stop asking the same question on every page. Respect an explicit
+    // goalLocked:false (e.g. user clicked "Change" and was sent back here).
+    setGoalLocked(
+      savedData.goalLocked === false
+        ? false
+        : Boolean(savedGoal)
+    );
+
+    // If the saved experience isn't one of the preset options, treat it as
+    // a custom value the user typed in previously and restore it into the
+    // "Other" text box instead of silently dropping it.
+    const savedExperience = savedData.experience || "College Student";
+    if (savedExperience && !EXPERIENCE_OPTIONS.includes(savedExperience)) {
+      setExperience("Other");
+      setOtherExperience(savedExperience);
+    } else {
+      setExperience(savedExperience);
+    }
   }, [savedData]);
 
   /* ── Drag handlers ───────────────────────────────────────── */
@@ -96,6 +135,12 @@ export default function ResumeUpload({
 
   /* ── Main upload + AI extraction ─────────────────────────── */
   const handleFileUpload = async (file: File) => {
+    // Guard against duplicate/overlapping calls — e.g. a stray onChange
+    // firing alongside onDrop for the same file, or a fast double-click —
+    // which previously could cause a stale request to land an error message
+    // after a newer, successful one had already shown.
+    if (isProcessing) return;
+
     setMsg("");
     setDetectedSkills([]);
     setResumeSummary("");
@@ -180,7 +225,8 @@ export default function ResumeUpload({
           resumeSummary: summary,
           suggestedGoals: goals,
           goal: goal || goals[0] || "",
-          experience,
+          goalLocked: goalLocked || Boolean(goal) || goals.length > 0,
+          experience: experience === "Other" ? otherExperience : experience,
         });
 
       } else {
@@ -198,7 +244,14 @@ export default function ResumeUpload({
 
   const removeFile = async () => {
     if (abortRef.current) abortRef.current.abort();
-    await fetch("/api/resume/delete", { method: "POST" });
+    try {
+      await fetch("/api/resume/delete", { method: "POST" });
+    } catch (err) {
+      // Non-fatal: even if the delete request fails (e.g. server briefly
+      // unreachable), we still clear the local UI state below so the user
+      // isn't stuck looking at a stale "uploaded" card.
+      console.error("[Resume] Delete request failed:", err);
+    }
     setUploadedFile(null);
     setDetectedSkills([]);
     setResumeSummary("");
@@ -214,13 +267,19 @@ export default function ResumeUpload({
   };
 
   const continueManual = () => {
+    if (!goal.trim()) {
+      setMsg("Please add a career goal before continuing.");
+      setMsgType("error");
+      return;
+    }
     const skillsArray = skills.split(",").map((s) => s.trim()).filter(Boolean);
     onUpload({
       manualSkills: skills,
       skills: skillsArray,
       currentSkills: skillsArray,
       goal,
-      experience,
+      goalLocked: true,
+      experience: experience === "Other" ? otherExperience : experience,
       resume: uploadedFile,
     });
   };
@@ -346,26 +405,61 @@ export default function ResumeUpload({
             </div>
 
             <div>
-              <label className="font-medium">Career Goals</label>
-              <Input
-                value={goal}
-                onChange={(e) => setGoal(e.target.value)}
-                placeholder="e.g. Java Full Stack Developer"
-                className="mt-2"
-              />
-              {suggestedGoals.length > 0 && (
-                <div className="mt-2 flex flex-wrap gap-2">
-                  <span className="text-xs text-gray-500">AI suggests:</span>
-                  {suggestedGoals.map((g, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setGoal(g)}
-                      className="text-xs bg-blue-50 text-blue-700 border border-blue-200 px-2 py-1 rounded-lg hover:bg-blue-100"
-                    >
-                      {g}
-                    </button>
-                  ))}
+              <div className="flex items-center justify-between">
+                <label className="font-medium">Career Goal</label>
+                {goalLocked && goal && (
+                  <button
+                    type="button"
+                    onClick={() => setGoalLocked(false)}
+                    className="text-xs text-blue-600 font-medium hover:underline"
+                  >
+                    Change
+                  </button>
+                )}
+              </div>
+
+              {goalLocked && goal ? (
+                <div className="mt-2 flex items-center justify-between p-4 rounded-xl border bg-gray-50">
+                  <span className="font-medium text-gray-800">{goal}</span>
+                  <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
                 </div>
+              ) : (
+                <>
+                  <div className="flex gap-2 mt-2">
+                    <Input
+                      value={goal}
+                      onChange={(e) => setGoal(e.target.value)}
+                      placeholder="e.g. Java Full Stack Developer"
+                      autoFocus={!goalLocked && Boolean(suggestedGoals.length === 0)}
+                    />
+                    {goal && (
+                      <Button
+                        type="button"
+                        onClick={() => setGoalLocked(true)}
+                        className="px-5 whitespace-nowrap"
+                      >
+                        Confirm
+                      </Button>
+                    )}
+                  </div>
+                  {suggestedGoals.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      <span className="text-xs text-gray-500">AI suggests:</span>
+                      {suggestedGoals.map((g, i) => (
+                        <button
+                          key={i}
+                          onClick={() => {
+                            setGoal(g);
+                            setGoalLocked(true);
+                          }}
+                          className="text-xs bg-blue-50 text-blue-700 border border-blue-200 px-2 py-1 rounded-lg hover:bg-blue-100"
+                        >
+                          {g}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </>
               )}
             </div>
 
@@ -376,11 +470,22 @@ export default function ResumeUpload({
                 onChange={(e) => setExperience(e.target.value)}
                 className="w-full mt-2 p-4 rounded-xl border"
               >
-                <option>College Student</option>
-                <option>Recent Graduate</option>
-                <option>Fresher</option>
-                <option>Working Professional</option>
+                {EXPERIENCE_OPTIONS.map((opt) => (
+                  <option key={opt}>{opt}</option>
+                ))}
+                <option>Other</option>
               </select>
+
+              {experience === "Other" && (
+                <input
+                  type="text"
+                  autoFocus
+                  value={otherExperience}
+                  onChange={(e) => setOtherExperience(e.target.value)}
+                  placeholder="Please specify your experience level"
+                  className="w-full mt-2 p-4 rounded-xl border text-sm"
+                />
+              )}
             </div>
 
             <Button onClick={continueManual} className="w-full h-12">

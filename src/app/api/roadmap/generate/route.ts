@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "GROQ_API_KEY missing in .env.local" }, { status: 500 });
     }
 
-    const { goal, duration, userId } = await request.json();
+    const { goal, duration, weeklyHours, userId, currentSkills } = await request.json();
     if (!goal || !duration) {
       return NextResponse.json({ error: "goal and duration required" }, { status: 400 });
     }
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const allSkills = [...new Set([...skillsFromDB, ...manualSkills])];
+    const allSkills = [...new Set([...skillsFromDB, ...manualSkills, ...(currentSkills ?? [])])];
     const hasResume = resumeText.trim().length > 100;
     const hasProjects = richAnalysis?.projects?.length > 0;
 
@@ -75,7 +75,7 @@ Your roadmap must:
 1. Start from WHERE THIS STUDENT IS RIGHT NOW — only teach what they don't know
 2. Reference their ACTUAL projects and suggest improvements or extensions
 3. Focus milestones on their SPECIFIC skill gaps for the goal
-4. Be realistic for their experience level (${experience})
+4. Be realistic for their experience level (${experience}) AND their available weekly time (${weeklyHours || "not specified"}) — pace milestone duration and scope accordingly (e.g. 1-3 hrs/week needs lighter weekly scope than 15+ hrs/week for the same calendar timeline)
 5. Sound like advice from a mentor who READ their resume — not a generic AI
 
 EXACT JSON shape required (use these exact field names — no variations):
@@ -114,6 +114,7 @@ Respond ONLY with raw JSON. No markdown. No explanation.`;
     const userMessage = `STUDENT PROFILE:
 Goal: ${goal}
 Timeline: ${duration}
+Weekly Time Commitment: ${weeklyHours || "Not specified"}
 Experience: ${experience}
 Education: ${education || "Not specified"}
 Current Skills (from resume): ${allSkills.length > 0 ? allSkills.join(", ") : "None detected yet"}
@@ -209,7 +210,7 @@ Generate a personalized roadmap. The personalNote MUST mention at least one spec
         });
         await db.user.update({
           where: { id: userId },
-          data: { roadmapData: roadmap, goal, selectedCourse: goal, selectedDuration: duration },
+          data: { roadmapData: roadmap, goal, selectedCourse: goal, selectedDuration: duration, weeklyHours },
         });
       } catch (dbErr) {
         console.warn("[Roadmap] DB save non-fatal:", dbErr);

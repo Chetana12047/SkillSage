@@ -31,8 +31,10 @@ const emptyUserData = {
   skills: [],
   field: '',
   goal: '',
+  goalLocked: false,
   selectedCourse: '',
   selectedDuration: '',
+  weeklyHours: '',
   roadmap: null,
   progress: [],
   activeTab: 'upload',
@@ -121,6 +123,11 @@ export default function Home() {
           setUserData({
             ...emptyUserData,
 
+            userId:
+              data.id ||
+              session?.user?.id ||
+              null,
+
             resumeUrl:
               data.resumeUrl ||
               '',
@@ -139,12 +146,19 @@ export default function Home() {
               data.goal ||
               '',
 
+            goalLocked:
+              Boolean(data.goal),
+
             selectedCourse:
               data.selectedCourse ||
               '',
 
             selectedDuration:
               data.selectedDuration ||
+              '',
+
+            weeklyHours:
+              data.weeklyHours ||
               '',
 
             roadmap:
@@ -238,6 +252,8 @@ export default function Home() {
               goalData.roadmap,
             selectedDuration:
               goalData.duration,
+            weeklyHours:
+              goalData.weeklyHours,
           }),
         }
       )
@@ -252,6 +268,19 @@ export default function Home() {
       )
 
       moveTab('roadmap')
+    }
+
+  /* CHANGE GOAL — unlock it and send the user back to step 1 */
+  const handleChangeGoal =
+    () => {
+      setUserData(
+        (prev: any) => ({
+          ...prev,
+          goalLocked: false,
+        })
+      )
+
+      moveTab('upload')
     }
 
   /* RESET */
@@ -421,11 +450,20 @@ export default function Home() {
               currentSkills={
                 userData.currentSkills
               }
-              savedGoal={
-                userData.selectedCourse
+              userId={
+                userData.userId
+              }
+              goal={
+                userData.goal
+              }
+              onChangeGoal={
+                handleChangeGoal
               }
               savedDuration={
                 userData.selectedDuration
+              }
+              savedWeeklyHours={
+                userData.weeklyHours
               }
             />
           </TabsContent>

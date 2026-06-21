@@ -14,6 +14,8 @@ export async function POST(req: Request) {
       },
       data: {
         roadmapData: body.roadmap,
+        selectedDuration: body.selectedDuration,
+        weeklyHours: body.weeklyHours,
       },
     });
 

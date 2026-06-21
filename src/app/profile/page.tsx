@@ -25,17 +25,15 @@ export default function ProfilePage() {
   }, [])
 
   const loadUser = async () => {
-    const res = await fetch(
-      '/api/user/me'
-    )
-
-    const data =
-      await res.json()
-
-    if (res.ok) {
-      setUser(data)
-    }
+  const res = await fetch('/api/user/me')
+  const data = await res.json()
+  if (res.ok) {
+    setUser(data)
+  } else {
+    // Session expired or unauthorized — redirect to login
+    router.replace('/login')
   }
+}
 
   const calculateProgress = () => {
     if (!user) return 0

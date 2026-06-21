@@ -46,6 +46,7 @@ model User {
   // -------------------------
   selectedCourse  String?
   selectedDuration String?
+  weeklyHours     String?
   activeTab       String?
 
   roadmapData     Json?
