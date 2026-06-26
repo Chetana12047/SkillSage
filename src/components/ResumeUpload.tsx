@@ -166,7 +166,7 @@ export default function ResumeUpload({
 
     setUploadedFile(file);
     setIsProcessing(true);
-    setMsg("Uploading and analyzing your resume with AI...");
+    setMsg(" ");
     setMsgType("info");
 
     const formData = new FormData();
@@ -210,6 +210,7 @@ export default function ResumeUpload({
           setGoal(goals[0]);
         }
 
+        setMsg("");
         setMsg(`✓ Resume analyzed! Found ${extractedSkills.length} skills.`);
         setMsgType("success");
 
@@ -261,10 +262,19 @@ export default function ResumeUpload({
     if (onReset) onReset();
   };
 
-  const viewFile = () => {
-    const url = uploadedFile?.url || savedData?.resumeUrl;
-    if (url) window.open(url, "_blank");
-  };
+const viewFile = () => {
+  const url = uploadedFile?.url || savedData?.resumeUrl;
+
+  if (!url) {
+    setMsg("Resume preview unavailable.");
+    setMsgType("error");
+    return;
+  }
+
+  const viewerUrl = `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(url)}`;
+
+  window.open(viewerUrl, "_blank", "noopener,noreferrer");
+};;
 
   const continueManual = () => {
     if (!goal.trim()) {
@@ -348,29 +358,33 @@ export default function ResumeUpload({
                   </div>
                 </div>
 
-                {isProcessing ? (
-                  <div className="flex items-center gap-2 text-blue-600">
-                    <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-                    <p className="text-sm">AI is analyzing your resume...</p>
-                  </div>
-                ) : (
-                  <div className="flex gap-2 text-green-600 items-center">
-                    <CheckCircle className="w-5 h-5" />
-                    <span className="font-medium">Resume analyzed successfully</span>
-                  </div>
+                {isProcessing && (
+                <div className="flex items-center gap-2 text-blue-600">
+                <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                <p className="text-sm">AI is analyzing your resume...</p>
+                </div>
                 )}
               </div>
             )}
 
-            {msg && (
-              <div className={`mt-4 flex items-start gap-2 text-sm p-3 rounded-lg ${
-                msgType === "success" ? "bg-green-50 text-green-700" :
-                msgType === "error" ? "bg-red-50 text-red-700" : "bg-blue-50 text-blue-700"
-              }`}>
-                {msgType === "error" ? <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" /> : null}
-                {msg}
-              </div>
-            )}
+            {msg.trim() && (
+             <div
+               className={`mt-4 flex items-start gap-2 text-sm p-3 rounded-lg ${
+                 msgType === "success"
+                   ? "bg-green-50 text-green-700"
+                   : msgType === "error"
+                   ? "bg-red-50 text-red-700"
+                   : "bg-blue-50 text-blue-700"
+               }`}
+             >
+               {msgType === "error" ? (
+                 <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+               ) : null}
+           
+               {msg}
+             </div>
+           )}
+              
           </CardContent>
         </Card>
 

@@ -115,7 +115,7 @@ export async function POST(req: NextRequest) {
     // Upload to Cloudinary
     const uploadRes: any = await new Promise((resolve, reject) => {
       cloudinary.uploader
-        .upload_stream({ resource_type: "raw", folder: "skillsage_resumes" }, (error, result) => {
+        .upload_stream({ resource_type: "auto", folder: "skillsage_resumes" }, (error, result) => {
           if (error) reject(error);
           else resolve(result);
         })

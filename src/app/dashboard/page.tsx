@@ -66,6 +66,10 @@ export default function Home() {
 
   const [userData, setUserData] =
     useState<any>(emptyUserData)
+    console.log(
+  'TRACKER ROADMAP ID:',
+  userData.roadmapId
+)
 
   /* URL TAB CHANGE SYNC */
   useEffect(() => {
@@ -182,8 +186,9 @@ export default function Home() {
               '',
 
             roadmapId:
-              data.roadmapId ||
-              null,
+            data.roadmapId ||
+            data.roadmaps?.[0]?.id ||
+            null,
           })
         }
       } catch (error) {
@@ -239,33 +244,45 @@ export default function Home() {
     async (
       goalData: any
     ) => {
-      await fetch(
-        '/api/user/save-roadmap',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type':
-              'application/json',
-          },
-          body: JSON.stringify({
-            roadmap:
-              goalData.roadmap,
-            selectedDuration:
-              goalData.duration,
-            weeklyHours:
-              goalData.weeklyHours,
-          }),
-        }
-      )
+      const res = await fetch(
+  '/api/user/save-roadmap',
+  {
+    method: 'POST',
+    headers: {
+      'Content-Type':
+        'application/json',
+    },
+    body: JSON.stringify({
+      roadmap:
+        goalData.roadmap,
+      selectedDuration:
+        goalData.duration,
+      weeklyHours:
+        goalData.weeklyHours,
+    }),
+  }
+)
+
+const savedData =
+  await res.json()
+  console.log(
+  'SAVE ROADMAP RESPONSE:',
+  savedData
+)
 
       setUserData(
-        (prev: any) => ({
-          ...prev,
-          ...goalData,
-          roadmap:
-            goalData.roadmap,
-        })
-      )
+  (prev: any) => ({
+    ...prev,
+    ...goalData,
+
+    roadmap:
+      goalData.roadmap,
+
+    roadmapId:
+      savedData.roadmap?.id ||
+      prev.roadmapId,
+  })
+)
 
       moveTab('roadmap')
     }
@@ -487,17 +504,18 @@ export default function Home() {
               </p>
             )}
           </TabsContent>
+          
 
           {/* PROGRESS */}
           <TabsContent value="progress">
             {userData.roadmap ? (
+              
               <ProgressTracker
                 roadmap={
                   userData.roadmap
                 }
                 roadmapId={
-                  userData.roadmapId ||
-                  'demo-roadmap'
+                  userData.roadmapId
                 }
               />
             ) : (

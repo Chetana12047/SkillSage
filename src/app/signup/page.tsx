@@ -269,21 +269,27 @@ export default function SignupPage() {
   };
 
   const handleSkillsNext = (e: React.FormEvent) => {
-    e.preventDefault();
-    const customSkill = otherInputs.skill.trim();
-    const finalSkills = customSkill
-      ? [...selectedSkills, customSkill]
-      : selectedSkills;
+  e.preventDefault();
 
-    if (finalSkills.length === 0) {
-      setMsg("Please select or add at least one skill.");
-      return;
-    }
-    setSelectedSkills(finalSkills);
-    setOther("skill", "");
-    setMsg("");
-    setStep(6);
-  };
+  const customSkill = otherInputs.skill.trim();
+
+  // merge selected + manually typed skill
+  const finalSkills = customSkill
+    ? [...new Set([...selectedSkills, customSkill])]
+    : selectedSkills;
+
+  if (finalSkills.length === 0) {
+    setMsg("Please select or add at least one skill.");
+    return;
+  }
+
+  // IMPORTANT: permanently store merged skills
+  setSelectedSkills(finalSkills);
+
+  setOther("skill", "");
+  setMsg("");
+  setStep(6);
+};
 
   const handleGoal = (value: string) => {
     if (value === OTHER_VALUE) {
@@ -337,8 +343,8 @@ export default function SignupPage() {
       field: form.field,
       goal: form.goal || levelValue,
       level: levelValue,
-      skills: selectedSkills,
-      manualSkills: selectedSkills.join(", "),
+      skills: [...new Set(selectedSkills)],
+      manualSkills: [...new Set(selectedSkills)].join(", "),
     };
 
     try {

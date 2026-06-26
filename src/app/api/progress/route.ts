@@ -85,14 +85,24 @@ export async function POST(
       )
     }
 
-    const {
-      roadmapId,
-      weekNumber,
-      goal,
-      actualHours,
-      completed,
-      notes,
-    } = await request.json()
+    const body = await request.json()
+
+console.log('PROGRESS BODY:', body)
+
+const {
+  roadmapId,
+  weekNumber,
+  goal,
+  actualHours,
+  completed,
+  notes,
+} = body
+if (!roadmapId) {
+  return NextResponse.json(
+    { error: 'roadmapId missing' },
+    { status: 400 }
+  )
+}
 
     const progress =
       await db.progress.upsert({

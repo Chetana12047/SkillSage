@@ -62,91 +62,121 @@ export default function ProgressTracker({
   }, [roadmapId])
 
   const loadProgress = async () => {
-    try {
-      const res = await fetch(
-        `/api/progress?userId=demo-user-id&roadmapId=${roadmapId}`
+  try {
+    console.log('LOADING ROADMAP:', roadmapId)
+    const activeRoadmapId =
+  roadmapId
+
+    console.log(
+  'LOADING PROGRESS FOR:',
+  roadmapId
+)
+
+const res = await fetch(
+  `/api/progress?roadmapId=${activeRoadmapId}`
+)
+    const data = await res.json()
+
+    console.log('LOADED DATA:', data)
+
+    if (
+      data.success &&
+      data.progress.length > 0
+    ) {
+      const formatted =
+        data.progress.map(
+          (item: any) => ({
+            week: item.weekNumber,
+            goal: item.goal,
+            completed: item.completed,
+            hours: item.actualHours,
+          })
+        )
+
+      setWeeklyProgress(formatted)
+
+      const pending =
+        formatted.find(
+          (w: any) => !w.completed
+        )
+
+      setCurrentWeek(
+        pending
+          ? pending.week
+          : formatted.length
       )
-
-      const data = await res.json()
-
-      if (
-        data.success &&
-        data.progress.length > 0
-      ) {
-        const formatted =
-          data.progress.map(
-            (item: any) => ({
-              week:
-                item.weekNumber,
-              goal: item.goal,
-              completed:
-                item.completed,
-              hours:
-                item.actualHours,
-            })
-          )
-
-        setWeeklyProgress(
-          formatted
-        )
-
-        const pending =
-          formatted.find(
-            (w: any) =>
-              !w.completed
-          )
-
-        setCurrentWeek(
-          pending
-            ? pending.week
-            : formatted.length
-        )
-      } else {
-        setWeeklyProgress([
-          {
-            week: 1,
-            goal:
-              'Start Learning',
-            completed:
-              false,
-            hours: 0,
-          },
-        ])
+    } else {
+      const defaultWeek = {
+        week: 1,
+        goal: 'Start Learning',
+        completed: false,
+        hours: 0,
       }
-    } catch (error) {
-      console.log(error)
+
+      setWeeklyProgress([defaultWeek])
+
     }
+  } catch (error) {
+    console.log(error)
   }
+}
 
   /* SAVE WEEK */
   const saveWeek = async (
-    weekNumber: number,
-    data: any
-  ) => {
-    try {
-      await fetch(
-        '/api/progress',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type':
-              'application/json',
-          },
-          body: JSON.stringify({
-            userId:
-              'demo-user-id',
-            roadmapId:
-              roadmapId ||
-              'demo-roadmap',
-            weekNumber,
-            ...data,
-          }),
-        }
-      )
-    } catch (error) {
-      console.log(error)
-    }
+  weekNumber: number,
+  data: any
+) => {
+  try {
+    console.log('SAVING:', {
+      roadmapId,
+      weekNumber,
+      data,
+    })
+    const activeRoadmapId =
+  roadmapId
+  console.log(
+  'SAVING WEEK:',
+  {
+    roadmapId,
+    weekNumber,
+    data,
   }
+)
+if (!activeRoadmapId) {
+  console.log(
+    'NO ROADMAP ID'
+  )
+  return
+}
+
+    const res = await fetch(
+      '/api/progress',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type':
+            'application/json',
+        },
+        body: JSON.stringify({
+          roadmapId:
+  activeRoadmapId,
+          weekNumber,
+          ...data,
+        }),
+      }
+    )
+
+    const result =
+      await res.json()
+
+    console.log(
+      'SAVE RESULT:',
+      result
+    )
+  } catch (error) {
+    console.log(error)
+  }
+}
 
   /* ADD HOURS */
   const addHours = async () => {
@@ -155,8 +185,10 @@ export default function ProgressTracker({
         currentWeek - 1
       ]
 
-    const newHours =
-      target.hours + 2
+    if (!target) return
+
+const newHours =
+  (target.hours || 0) + 2
 
     const updated =
       weeklyProgress.map(
@@ -223,8 +255,12 @@ export default function ProgressTracker({
         return
 
       const nextWeek =
-        weeklyProgress.length +
-        1
+  Math.max(
+    ...weeklyProgress.map(
+      (w) => w.week
+    ),
+    0
+  ) + 1
 
       const newWeekData = {
         week: nextWeek,
@@ -413,9 +449,13 @@ export default function ProgressTracker({
                   <Button
                     variant="outline"
                     className="flex-1"
-                    onClick={
-                      addHours
-                    }
+                    onClick={() => {
+                      if (
+                        weeklyProgress.length > 0
+                      ) {
+                        addHours()
+                      }
+                    }}
                   >
                     Log 2 Hours
                   </Button>
