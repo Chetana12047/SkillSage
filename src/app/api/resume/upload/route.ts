@@ -115,7 +115,7 @@ export async function POST(req: NextRequest) {
     // Upload to Cloudinary
     const uploadRes: any = await new Promise((resolve, reject) => {
       cloudinary.uploader
-        .upload_stream({ resource_type: "auto", folder: "skillsage_resumes" }, (error, result) => {
+        .upload_stream({ resource_type: "raw", folder: "skillsage_resumes" }, (error, result) => {
           if (error) reject(error);
           else resolve(result);
         })
@@ -170,9 +170,12 @@ export async function POST(req: NextRequest) {
     });
 
     // Return EVERYTHING the frontend needs
+    const previewUrl =
+  uploadRes.secure_url
+
     return NextResponse.json({
       success: true,
-      url: uploadRes.secure_url,
+      url: previewUrl,
       skills: detectedSkills,            // array — used by ResumeUpload to show badges
       level: currentLevel,
       summary: analysis?.summary ?? "",

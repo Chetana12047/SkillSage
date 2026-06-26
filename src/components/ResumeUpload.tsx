@@ -263,18 +263,23 @@ export default function ResumeUpload({
   };
 
 const viewFile = () => {
-  const url = uploadedFile?.url || savedData?.resumeUrl;
+  const url =
+    uploadedFile?.url ||
+    savedData?.resumeUrl
 
   if (!url) {
-    setMsg("Resume preview unavailable.");
-    setMsgType("error");
-    return;
+    setMsg("Resume preview unavailable.")
+    setMsgType("error")
+    return
   }
 
-  const viewerUrl = `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(url)}`;
-
-  window.open(viewerUrl, "_blank", "noopener,noreferrer");
-};;
+  window.open(
+  `https://docs.google.com/viewer?url=${encodeURIComponent(
+    url
+  )}&embedded=true`,
+  "_blank"
+)
+}
 
   const continueManual = () => {
     if (!goal.trim()) {
