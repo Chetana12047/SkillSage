@@ -60,8 +60,17 @@ export async function POST(
 
           cgpa:
             body.cgpa || "",
-        },
-      });
+            skills:
+            Array.isArray(
+              body.skills
+            )
+              ? body.skills.join(',')
+              : "",
+
+            atsData:
+              body.atsData || null,
+                    },
+                  });
 
     return NextResponse.json({
       success: true,

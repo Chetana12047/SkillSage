@@ -44,6 +44,7 @@ const emptyUserData = {
   userId: null,
   experience: 'College Student',
   education: '',
+  atsData: null,
 }
 
 export default function Home() {
@@ -172,6 +173,9 @@ export default function Home() {
             progress:
               data.progressData ||
               [],
+              
+              atsData:
+              data.atsData || null,
 
             activeTab:
               data.activeTab ||
@@ -184,6 +188,8 @@ export default function Home() {
             education:
               data.education ||
               '',
+              atsData:
+             data.atsData || null,
 
             roadmapId:
             data.roadmapId ||
@@ -228,17 +234,45 @@ export default function Home() {
 
   /* RESUME */
   const handleResumeUpload =
-    (data: any) => {
-      setUserData(
-        (prev: any) => ({
-          ...prev,
-          ...data,
-        })
-      )
+  async (data: any) => {
 
-      moveTab('goal')
-    }
+    setUserData(
+      (prev: any) => ({
+        ...prev,
+        ...data,
+      })
+    )
 
+    /* SAVE TO DB */
+
+    await fetch(
+      '/api/user/update',
+      {
+        method: 'POST',
+
+        headers: {
+          'Content-Type':
+            'application/json',
+        },
+
+        body: JSON.stringify({
+          manualSkills:
+            data.manualSkills,
+
+          experience:
+            data.experience,
+
+          atsData:
+            data.atsData,
+
+          skills:
+            data.skills,
+        }),
+      }
+    )
+
+    moveTab('goal')
+  }
   /* GOAL + ROADMAP */
   const handleGoalSet =
     async (

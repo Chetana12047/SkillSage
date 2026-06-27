@@ -1,5 +1,3 @@
-// src/app/api/user/me/route.ts
-
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
@@ -39,6 +37,7 @@ export async function GET() {
         roadmapData: true,
         progressData: true,
         createdAt: true,
+        atsData: true,
 
         roadmaps: {
           orderBy: {
@@ -67,6 +66,33 @@ export async function GET() {
       roadmapId:
         user.roadmaps?.[0]?.id ||
         null,
+
+      atsData: user.atsData
+        ? {
+            score:
+              (user.atsData as any)
+                .score || 0,
+
+            matchedSkills:
+              (user.atsData as any)
+                .matchedSkills || [],
+
+            missingSkills:
+              (user.atsData as any)
+                .missingSkills || [],
+          }
+        : null,
+
+      skills:
+        typeof user.skills ===
+        'string'
+          ? user.skills
+              .split(',')
+              .map((s: string) =>
+                s.trim()
+              )
+              .filter(Boolean)
+          : [],
     })
   } catch (error) {
     console.error(

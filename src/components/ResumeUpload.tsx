@@ -28,6 +28,7 @@ import {
   Sparkles,
   AlertCircle,
 } from "lucide-react";
+import { generateATSScore } from "@/lib/ats";
 
 interface ResumeUploadProps {
   onUpload: (data: any) => void;
@@ -65,7 +66,12 @@ export default function ResumeUpload({
   const [goalLocked, setGoalLocked] = useState(false);
   const [experience, setExperience] = useState("College Student");
   const [otherExperience, setOtherExperience] = useState("");
-
+  const [atsData, setAtsData] =
+  useState<{
+    score: number
+    matchedSkills: string[]
+    missingSkills: string[]
+  } | null>(null)
   const abortRef = useRef<AbortController | null>(null);
 
   /* ── Auto-load saved data ────────────────────────────────── */
@@ -82,6 +88,28 @@ export default function ResumeUpload({
     if (savedData.skills?.length > 0) {
       setDetectedSkills(savedData.skills);
     }
+    if (savedData?.atsData) {
+
+  setAtsData({
+    score:
+      savedData.atsData.score || 0,
+
+    matchedSkills:
+      Array.isArray(
+        savedData.atsData.matchedSkills
+      )
+        ? savedData.atsData.matchedSkills
+        : [],
+
+    missingSkills:
+      Array.isArray(
+        savedData.atsData.missingSkills
+      )
+        ? savedData.atsData.missingSkills
+        : [],
+  });
+
+}
 
     // Prefer the freshest, most complete source: AI-extracted skills (array)
     // over manualSkills (a string that can go stale — e.g. left over from
@@ -134,114 +162,166 @@ export default function ResumeUpload({
   };
 
   /* ── Main upload + AI extraction ─────────────────────────── */
-  const handleFileUpload = async (file: File) => {
-    // Guard against duplicate/overlapping calls — e.g. a stray onChange
-    // firing alongside onDrop for the same file, or a fast double-click —
-    // which previously could cause a stale request to land an error message
-    // after a newer, successful one had already shown.
-    if (isProcessing) return;
+const handleFileUpload = async (file: File) => {
+  if (isProcessing) return;
 
-    setMsg("");
-    setDetectedSkills([]);
-    setResumeSummary("");
-    setSuggestedGoals([]);
+  setMsg("");
+  setDetectedSkills([]);
+  setResumeSummary("");
+  setSuggestedGoals([]);
+  //setAtsData(null);
 
-    const allowed = [
-      "application/pdf",
-      "application/msword",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    ];
+  const allowed = [
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ];
 
-    if (!allowed.includes(file.type)) {
-      setMsg("Only PDF, DOC, DOCX files allowed.");
-      setMsgType("error");
-      return;
-    }
+  if (!allowed.includes(file.type)) {
+    setMsg("Only PDF, DOC, DOCX files allowed.");
+    setMsgType("error");
+    return;
+  }
 
-    if (file.size > 2 * 1024 * 1024) {
-      setMsg("Max file size is 2MB.");
-      setMsgType("error");
-      return;
-    }
+  if (file.size > 2 * 1024 * 1024) {
+    setMsg("Max file size is 2MB.");
+    setMsgType("error");
+    return;
+  }
 
-    setUploadedFile(file);
-    setIsProcessing(true);
-    setMsg(" ");
-    setMsgType("info");
+  setUploadedFile(file);
+  setIsProcessing(true);
+  setMsg(" ");
+  setMsgType("info");
 
-    const formData = new FormData();
-    formData.append("resume", file);
+  const formData = new FormData();
+  formData.append("resume", file);
 
-    const controller = new AbortController();
-    abortRef.current = controller;
+  const controller = new AbortController();
+  abortRef.current = controller;
 
-    try {
-      const res = await fetch("/api/resume/upload", {
-        method: "POST",
-        body: formData,
-        signal: controller.signal,
+  try {
+    const res = await fetch("/api/resume/upload", {
+      method: "POST",
+      body: formData,
+      signal: controller.signal,
+    });
+
+    const data = await res.json();
+
+    setIsProcessing(false);
+
+    if (res.ok) {
+      const fileData = {
+        name: file.name,
+        size: file.size,
+        url: data.url,
+      };
+
+      setUploadedFile(fileData);
+
+      const extractedSkills: string[] =
+        data.skills ?? [];
+
+      const level: string =
+        data.level ?? "";
+
+      const summary: string =
+        data.summary ?? "";
+
+      const goals: string[] =
+        data.suggestedGoals ?? [];
+
+      /* ATS SCORE */
+
+      const ats = generateATSScore(
+        extractedSkills,
+        goal || goal[0]
+      );
+
+      console.log("ATS DATA:", ats);
+
+    setAtsData({
+  score: ats.score,
+  matchedSkills: ats.matchedSkills,
+  missingSkills: ats.missingSkills,
+});
+
+      /* STORE DATA */
+
+      setDetectedSkills(extractedSkills);
+      setResumeLevel(level);
+      setResumeSummary(summary);
+      setSuggestedGoals(goals);
+
+      if (extractedSkills.length > 0) {
+        setSkills(
+          extractedSkills.join(", ")
+        );
+      }
+
+      if (goals.length > 0 && !goal) {
+        setGoal(goals[0]);
+      }
+
+      setMsg(
+        `✓ Resume analyzed! Found ${extractedSkills.length} skills.`
+      );
+
+      setMsgType("success");
+
+      onUpload({
+        resume: fileData,
+        resumeUrl: data.url,
+
+        skills: extractedSkills,
+
+        currentSkills:
+          extractedSkills,
+
+        manualSkills:
+          extractedSkills.join(", "),
+
+        currentLevel: level,
+        resumeLevel: level,
+        resumeSummary: summary,
+
+        suggestedGoals: goals,
+
+        goal:
+          goal || goals[0] || "",
+
+        goalLocked:
+          goalLocked ||
+          Boolean(goal) ||
+          goals.length > 0,
+
+        experience:
+          experience === "Other"
+            ? otherExperience
+            : experience,
+
+        atsData: ats,
       });
+    } else {
+      setMsg(
+        data.error || "Upload failed."
+      );
 
-      const data = await res.json();
+      setMsgType("error");
+    }
+  } catch (err: any) {
+    if (err.name !== "AbortError") {
       setIsProcessing(false);
 
-      if (res.ok) {
-        const fileData = { name: file.name, size: file.size, url: data.url };
-        setUploadedFile(fileData);
+      setMsg(
+        "Upload failed. Please try again."
+      );
 
-        // ── FIXED: use AI-extracted skills from server response ──
-        const extractedSkills: string[] = data.skills ?? [];
-        const level: string = data.level ?? "";
-        const summary: string = data.summary ?? "";
-        const goals: string[] = data.suggestedGoals ?? [];
-
-        setDetectedSkills(extractedSkills);
-        setResumeLevel(level);
-        setResumeSummary(summary);
-        setSuggestedGoals(goals);
-
-        // Auto-populate skills textarea with detected skills
-        if (extractedSkills.length > 0) {
-          setSkills(extractedSkills.join(", "));
-        }
-
-        // Auto-populate goal if we found one and user hasn't typed one
-        if (goals.length > 0 && !goal) {
-          setGoal(goals[0]);
-        }
-
-        setMsg("");
-        setMsg(`✓ Resume analyzed! Found ${extractedSkills.length} skills.`);
-        setMsgType("success");
-
-        // Pass EVERYTHING to dashboard — including AI-extracted data
-        onUpload({
-          resume: fileData,
-          resumeUrl: data.url,
-          skills: extractedSkills,           // ← AI-detected skills array
-          currentSkills: extractedSkills,    // ← used by GoalSetting for skill gap
-          manualSkills: extractedSkills.join(", "),
-          currentLevel: level,
-          resumeLevel: level,
-          resumeSummary: summary,
-          suggestedGoals: goals,
-          goal: goal || goals[0] || "",
-          goalLocked: goalLocked || Boolean(goal) || goals.length > 0,
-          experience: experience === "Other" ? otherExperience : experience,
-        });
-
-      } else {
-        setMsg(data.error || "Upload failed.");
-        setMsgType("error");
-      }
-    } catch (err: any) {
-      if (err.name !== "AbortError") {
-        setIsProcessing(false);
-        setMsg("Upload failed. Please try again.");
-        setMsgType("error");
-      }
+      setMsgType("error");
     }
-  };
+  }
+};
 
   const removeFile = async () => {
     if (abortRef.current) abortRef.current.abort();
@@ -389,6 +469,92 @@ const viewFile = () => {
                {msg}
              </div>
            )}
+           {/* ── ATS SCORE CARD ──────────────────────── */}
+
+{atsData && (
+  <div className="mt-5">
+
+    <Card className="border-green-200 bg-green-50 shadow-none">
+      <CardContent className="p-5 space-y-4">
+
+        {/* TOP */}
+
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-bold text-green-900">
+              ATS Resume Score
+            </h3>
+
+            <p className="text-sm text-green-700">
+              AI analysis of resume quality
+            </p>
+          </div>
+
+          <div className="text-3xl font-bold text-green-700">
+            {atsData.score}%
+          </div>
+        </div>
+
+        <div>
+  <p className="text-sm font-semibold text-green-800 mb-2">
+    Matched Skills
+  </p>
+
+  <div className="flex flex-wrap gap-2">
+    {atsData.matchedSkills.length > 0 ? (
+      atsData.matchedSkills.map(
+        (
+          skill: string,
+          i: number
+        ) => (
+          <Badge
+            key={i}
+            className="bg-green-600 text-white"
+          >
+            {skill}
+          </Badge>
+        )
+      )
+    ) : (
+      <p className="text-sm text-gray-500">
+        No matched skills found
+      </p>
+    )}
+  </div>
+</div>
+        <div>
+  <p className="text-sm font-semibold text-red-700 mb-2">
+    Missing Skills
+  </p>
+
+  <div className="flex flex-wrap gap-2">
+    {atsData.missingSkills.length > 0 ? (
+      atsData.missingSkills.map(
+        (
+          skill: string,
+          i: number
+        ) => (
+          <Badge
+            key={i}
+            className="bg-red-100 text-red-700 border border-red-200"
+          >
+            {skill}
+          </Badge>
+        )
+      )
+    ) : (
+      <p className="text-sm text-gray-500">
+        No missing skills 🎉
+      </p>
+    )}
+  </div>
+</div>
+
+      </CardContent>
+    </Card>
+
+  </div>
+)}
               
           </CardContent>
         </Card>

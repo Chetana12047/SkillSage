@@ -8,6 +8,7 @@ import { v2 as cloudinary } from "cloudinary";
 import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { generateATSScore } from '@/lib/ats'
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -138,6 +139,12 @@ export async function POST(req: NextRequest) {
     const currentLevel: string = analysis?.level ?? "Beginner";
     const experience: string = analysis?.experience ?? existingUser?.experience ?? "Fresher";
     const education: string = analysis?.education ?? existingUser?.education ?? "";
+    const ats =
+  generateATSScore(
+    detectedSkills,
+    analysis?.suggestedGoals?.[0] ||
+      'Frontend Developer'
+  )
 
     // Store rich analysis in progressData (Json field — no schema change needed)
     const richAnalysis = {
@@ -166,6 +173,7 @@ export async function POST(req: NextRequest) {
           ...(existingUser?.progressData as any ?? {}),
           ...richAnalysis,
         },
+        atsData: ats,
       },
     });
 
@@ -183,7 +191,9 @@ export async function POST(req: NextRequest) {
       projects: analysis?.projects ?? [],
       education,
       experience,
+      ats,
       user,
+      atsData: ats,
     });
 
   } catch (error: any) {
