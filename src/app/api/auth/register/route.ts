@@ -28,6 +28,14 @@ export async function POST(req: Request) {
       );
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    if (!emailRegex.test(email.trim())) {
+      return NextResponse.json(
+        { message: "Please enter a valid email address (e.g. you@gmail.com)" },
+        { status: 400 }
+      );
+    }
+
     const normalizedEmail = email.trim().toLowerCase();
 
     // ── Duplicate check ─────────────────────────────────────────────────────

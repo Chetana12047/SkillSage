@@ -191,6 +191,11 @@ export default function SignupPage() {
       setMsg("Password must be at least 6 characters.");
       return;
     }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    if (!emailRegex.test(form.email.trim())) {
+      setMsg("Please enter a valid email address (e.g. you@gmail.com)");
+      return;
+    }
     setMsg("");
     setCheckingEmail(true);
     try {
@@ -502,6 +507,23 @@ export default function SignupPage() {
                 className="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-base transition disabled:opacity-60 mt-2"
               >
                 {checkingEmail ? "Checking..." : "Let's Dive In →"}
+              </button>
+
+              {/* ── Divider ── */}
+              <div className="flex items-center gap-3 my-2">
+                <div className="flex-1 h-px bg-gray-200" />
+                <span className="text-xs text-gray-400 font-medium">OR</span>
+                <div className="flex-1 h-px bg-gray-200" />
+              </div>
+
+              {/* ── Google button ── */}
+              <button
+                type="button"
+                onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+                className="w-full h-12 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 flex items-center justify-center gap-3 font-semibold text-gray-700 transition"
+              >
+                <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-5 h-5" alt="Google" />
+                Continue with Google
               </button>
 
               <p className="text-center text-sm text-gray-500 mt-4">
