@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Groq from "groq-sdk";
 
+export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const groq = new Groq({
