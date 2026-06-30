@@ -1,23 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
-import Groq from "groq-sdk";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
-
 export async function POST(req: NextRequest) {
   try {
+    const Groq = (await import("groq-sdk")).default;
+
+    const groq = new Groq({
+      apiKey: process.env.GROQ_API_KEY,
+    });
+
     const formData = await req.formData();
 
     const audio = formData.get("audio") as File;
 
     if (!audio) {
       return NextResponse.json(
-        { error: "No audio uploaded" },
-        { status: 400 }
+        {
+          error: "No audio uploaded",
+        },
+        {
+          status: 400,
+        }
       );
     }
 
