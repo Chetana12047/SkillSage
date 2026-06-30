@@ -139,12 +139,20 @@ export async function POST(req: NextRequest) {
     const currentLevel: string = analysis?.level ?? "Beginner";
     const experience: string = analysis?.experience ?? existingUser?.experience ?? "Fresher";
     const education: string = analysis?.education ?? existingUser?.education ?? "";
-    const ats =
-  generateATSScore(
-    detectedSkills,
-    analysis?.suggestedGoals?.[0] ||
-      'Frontend Developer'
-  )
+const actualGoal =
+  existingUser?.goal ||
+  analysis?.suggestedGoals?.[0];
+
+const ats = actualGoal
+  ? generateATSScore(
+      detectedSkills,
+      actualGoal
+    )
+  : {
+      score: 0,
+      matchedSkills: [],
+      missingSkills: [],
+    };
 
     // Store rich analysis in progressData (Json field — no schema change needed)
     const richAnalysis = {

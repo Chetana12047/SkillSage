@@ -69,8 +69,16 @@ export async function POST() {
           session.user.email,
       },
       data: {
-        resumeUrl: null,
-      },
+  resumeUrl: null,
+  resumeText: "",
+  skills: "",
+
+  atsData: {
+    score: 0,
+    matchedSkills: [],
+    missingSkills: [],
+  },
+},
     });
 
     return NextResponse.json({

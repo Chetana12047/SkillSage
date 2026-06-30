@@ -28,7 +28,6 @@ import {
   Sparkles,
   AlertCircle,
 } from "lucide-react";
-import { generateATSScore } from "@/lib/ats";
 
 interface ResumeUploadProps {
   onUpload: (data: any) => void;
@@ -88,8 +87,10 @@ export default function ResumeUpload({
     if (savedData.skills?.length > 0) {
       setDetectedSkills(savedData.skills);
     }
-    if (savedData?.atsData) {
-
+if (
+  savedData?.atsData &&
+  savedData?.resumeUrl
+) {
   setAtsData({
     score:
       savedData.atsData.score || 0,
@@ -108,7 +109,8 @@ export default function ResumeUpload({
         ? savedData.atsData.missingSkills
         : [],
   });
-
+} else {
+  setAtsData(null);
 }
 
     // Prefer the freshest, most complete source: AI-extracted skills (array)
@@ -234,18 +236,7 @@ const handleFileUpload = async (file: File) => {
 
       /* ATS SCORE */
 
-      const ats = generateATSScore(
-        extractedSkills,
-        goal || goal[0]
-      );
-
-      console.log("ATS DATA:", ats);
-
-    setAtsData({
-  score: ats.score,
-  matchedSkills: ats.matchedSkills,
-  missingSkills: ats.missingSkills,
-});
+       setAtsData(data.atsData || null);
 
       /* STORE DATA */
 
@@ -301,7 +292,7 @@ const handleFileUpload = async (file: File) => {
             ? otherExperience
             : experience,
 
-        atsData: ats,
+        atsData: data.atsData,
       });
     } else {
       setMsg(
@@ -337,6 +328,8 @@ const handleFileUpload = async (file: File) => {
     setDetectedSkills([]);
     setResumeSummary("");
     setSuggestedGoals([]);
+    setSkills("");
+    setAtsData(null);
     setMsg("File removed.");
     setMsgType("info");
     if (onReset) onReset();
