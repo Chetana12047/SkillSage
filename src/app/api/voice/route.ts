@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Groq from "groq-sdk";
 import { toFile } from "groq-sdk/uploads";
+export const dynamic = "force-dynamic";
 
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
