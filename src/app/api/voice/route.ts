@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import Groq from "groq-sdk";
-import { toFile } from "groq-sdk/uploads";
+import fs from "fs";
+import path from "path";
+
 export const dynamic = "force-dynamic";
 
 const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
+  apiKey: process.env.GROQ_API_KEY!,
 });
 
 export async function POST(req: NextRequest) {
@@ -25,30 +27,52 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    /* CONVERT FILE */
+
     const bytes =
       await audio.arrayBuffer();
 
     const buffer =
       Buffer.from(bytes);
 
-    const groqFile =
-      await toFile(
-        buffer,
-        audio.name || "audio.webm"
-      );
+    /* TEMP FILE */
+
+    const tempPath = path.join(
+      process.cwd(),
+      `temp-${Date.now()}.webm`
+    );
+
+    fs.writeFileSync(
+      tempPath,
+      buffer
+    );
+
+    /* SEND TO GROQ */
 
     const transcription =
       await groq.audio.transcriptions.create({
-        file: groqFile,
-        model: "whisper-large-v3",
-        response_format: "verbose_json",
+        file:
+          fs.createReadStream(
+            tempPath
+          ),
+        model:
+          "whisper-large-v3",
+        response_format:
+          "verbose_json",
         language: "en",
       });
 
+    /* CLEANUP */
+
+    fs.unlinkSync(tempPath);
+
     return NextResponse.json({
-      text: transcription.text,
+      text:
+        transcription.text,
     });
+
   } catch (error: any) {
+
     console.error(error);
 
     return NextResponse.json(
